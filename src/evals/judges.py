@@ -1,5 +1,15 @@
-from langsmith import traceable
+import json
+import os
+from typing import Literal
+
+from langchain_openai import ChatOpenAI
+from dotenv import load_dotenv
 from typesafe_sdk import Choice, Noul, Score, TypeSafeClient
+from langsmith import traceable
+from pydantic import BaseModel, Field
+
+
+load_dotenv()
 
 
 SCORE_CRITERIA = [
@@ -15,7 +25,7 @@ CHOICE_CRITERIA = {
 }
 
 
-def _state(inputs: dict, outputs: dict, reference_outputs: dict) -> dict:
+def judge_state(inputs: dict, outputs: dict, reference_outputs: dict) -> dict:
     return {
         "user_question": inputs["question"],
         "expected_behavior": reference_outputs,
@@ -23,6 +33,31 @@ def _state(inputs: dict, outputs: dict, reference_outputs: dict) -> dict:
         "tool_calls": outputs["tool_calls"],
         "search_evidence": outputs.get("evidence", []),
     }
+
+
+class LLMQualityResult(BaseModel):
+    is_grounded: float = Field(ge=0, le=1)
+    matches_search_expectation: float = Field(ge=0, le=1)
+    is_useful: float = Field(ge=0, le=1)
+
+
+class LLMScoreResult(BaseModel):
+    score: int = Field(ge=0, le=len(SCORE_CRITERIA) - 1)
+
+
+class LLMChoiceResult(BaseModel):
+    choice: Literal["answered", "clarification_needed", "poor"]
+
+
+_llm = ChatOpenAI(
+    model=os.getenv("LLM_JUDGE_MODEL", "gpt-5.6-luna"),
+    timeout=60,
+    max_retries=0,
+)
+
+
+def _llm_prompt(state: dict, instructions: str) -> str:
+    return f"{instructions}\n\nEvaluate this JSON state:\n{json.dumps(state, sort_keys=True)}"
 
 
 @traceable(name="jev_weather_judge")
@@ -58,7 +93,7 @@ def _run_jev_judge(state: dict) -> dict:
 
 def jev_weather_quality(inputs: dict, outputs: dict, reference_outputs: dict) -> dict:
     """Use Jev to score groundedness, tool behavior, and usefulness together."""
-    scores = _run_jev_judge(_state(inputs, outputs, reference_outputs))
+    scores = _run_jev_judge(judge_state(inputs, outputs, reference_outputs))
     return {
         "key": "jev_weather_quality",
         "score": sum(scores.values()) / len(scores),
@@ -87,7 +122,7 @@ def _run_jev_score(state: dict) -> dict:
 
 def jev_weather_score(inputs: dict, outputs: dict, reference_outputs: dict) -> dict:
     """Use Jev's ordered Score primitive for response quality."""
-    answer = _run_jev_score(_state(inputs, outputs, reference_outputs))
+    answer = _run_jev_score(judge_state(inputs, outputs, reference_outputs))
     maximum = len(SCORE_CRITERIA) - 1
     return {
         "key": "jev_weather_score",
@@ -121,7 +156,7 @@ def _run_jev_choice(state: dict) -> dict:
 
 def jev_weather_choice(inputs: dict, outputs: dict, reference_outputs: dict) -> dict:
     """Use Jev's Choice primitive to classify the response outcome."""
-    answer = _run_jev_choice(_state(inputs, outputs, reference_outputs))
+    answer = _run_jev_choice(judge_state(inputs, outputs, reference_outputs))
     return {
         "key": "jev_weather_outcome",
         "value": answer["choice"],
@@ -129,4 +164,75 @@ def jev_weather_choice(inputs: dict, outputs: dict, reference_outputs: dict) -> 
             f"confidence={answer['confidence']:.3f}, "
             f"probabilities={answer['probabilities']}"
         ),
+    }
+
+
+@traceable(name="llm_weather_quality")
+def _run_llm_quality(state: dict) -> LLMQualityResult:
+    judge = _llm.with_structured_output(LLMQualityResult, method="json_schema")
+    return judge.invoke(
+        _llm_prompt(
+            state,
+            """Score each statement from 0 to 1. Grounded means the answer is supported by
+the supplied search evidence. Search expectation means the agent searched for an
+unambiguous location and did not search an ambiguous one. Useful means it answers
+the requested weather question with the location, timing, details, and source links,
+or asks for clarification when appropriate.""",
+        )
+    )
+
+
+def llm_weather_quality(inputs: dict, outputs: dict, reference_outputs: dict) -> dict:
+    answer = _run_llm_quality(judge_state(inputs, outputs, reference_outputs))
+    scores = answer.model_dump()
+    return {
+        "key": "llm_weather_quality",
+        "score": sum(scores.values()) / len(scores),
+        "comment": ", ".join(f"{name}={score:.3f}" for name, score in scores.items()),
+    }
+
+
+@traceable(name="llm_weather_score")
+def _run_llm_score(state: dict) -> LLMScoreResult:
+    judge = _llm.with_structured_output(LLMScoreResult, method="json_schema")
+    return judge.invoke(
+        _llm_prompt(
+            state,
+            """Rate the final answer using this ordered rubric. Return 0 for poor: missing,
+unsupported, or misleading; 1 for adequate: partially answers the question or has
+minor omissions; 2 for excellent: grounded, useful, and complete for the requested
+weather information.""",
+        )
+    )
+
+
+def llm_weather_score(inputs: dict, outputs: dict, reference_outputs: dict) -> dict:
+    answer = _run_llm_score(judge_state(inputs, outputs, reference_outputs))
+    return {
+        "key": "llm_weather_score",
+        "score": answer.score / (len(SCORE_CRITERIA) - 1),
+        "comment": f"raw_score={answer.score}",
+    }
+
+
+@traceable(name="llm_weather_choice")
+def _run_llm_choice(state: dict) -> LLMChoiceResult:
+    judge = _llm.with_structured_output(LLMChoiceResult, method="json_schema")
+    return judge.invoke(
+        _llm_prompt(
+            state,
+            """Classify the final response as exactly one of these outcomes:
+answered: a grounded weather answer with useful timing and source details;
+clarification_needed: correctly asks for clarification before answering an ambiguous
+location; poor: fails to answer usefully or makes unsupported weather claims.""",
+        )
+    )
+
+
+def llm_weather_choice(inputs: dict, outputs: dict, reference_outputs: dict) -> dict:
+    answer = _run_llm_choice(judge_state(inputs, outputs, reference_outputs))
+    return {
+        "key": "llm_weather_outcome",
+        "value": answer.choice,
+        "comment": "",
     }
