@@ -239,7 +239,7 @@ def run_langsmith(trials: int) -> dict:
         metadata={
             "judge_model": os.getenv("LLM_JUDGE_MODEL", "gpt-5.6-luna"),
         },
-        max_concurrency=1,
+        max_concurrency=2,
     )
     records = []
     for row in results:
@@ -279,7 +279,7 @@ def run_local(trials: int) -> dict:
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Compare Jev and LLM judge reliability.")
-    parser.add_argument("--trials", type=int, default=10)
+    parser.add_argument("--trials", type=int, default=100)
     parser.add_argument("--local", action="store_true")
     args = parser.parse_args()
     if args.trials < 2:

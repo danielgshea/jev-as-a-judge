@@ -49,9 +49,15 @@ class LLMChoiceResult(BaseModel):
     choice: Literal["answered", "clarification_needed", "poor"]
 
 
+_llm_model = os.getenv("LLM_JUDGE_MODEL", "gpt-5.6-luna")
+if not _llm_model.startswith("openai/"):
+    _llm_model = f"openai/{_llm_model.removeprefix('openai:')}"
+
 _llm = ChatOpenAI(
-    model=os.getenv("LLM_JUDGE_MODEL", "gpt-5.6-luna"),
-    timeout=60,
+    model=_llm_model,
+    base_url="https://gateway.smith.langchain.com/v1",
+    api_key=os.environ["LANGSMITH_API_KEY"],
+    timeout=180,
     max_retries=0,
 )
 

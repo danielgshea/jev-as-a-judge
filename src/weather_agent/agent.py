@@ -6,6 +6,7 @@ from dotenv import load_dotenv
 from tavily import TavilyClient
 
 load_dotenv()
+os.environ["LANGSMITH_GATEWAY"] = "true"
 
 tavily_client = TavilyClient(api_key=os.environ["TAVILY_API_KEY"])
 

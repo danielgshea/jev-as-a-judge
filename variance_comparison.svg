@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="420" viewBox="0 0 800 420">
+<rect width="100%" height="100%" fill="white"/>
+<text x="400.0" y="32.0" font-family="Arial, sans-serif" font-size="22px" text-anchor="middle" fill="#1f2937">Relative variance of repeated judge ratings</text>
+<text x="400.0" y="57.0" font-family="Arial, sans-serif" font-size="14px" text-anchor="middle" fill="#1f2937">Jev = 1× baseline; lower is more consistent</text>
+<line x1="177.4" y1="75" x2="177.4" y2="340" stroke="#d1d5db" stroke-width="1"/>
+<text x="177.4" y="368.0" font-family="Arial, sans-serif" font-size="13px" text-anchor="middle" fill="#1f2937">1×</text>
+<line x1="401.3" y1="75" x2="401.3" y2="340" stroke="#d1d5db" stroke-width="1"/>
+<text x="401.3" y="368.0" font-family="Arial, sans-serif" font-size="13px" text-anchor="middle" fill="#1f2937">10×</text>
+<line x1="625.2" y1="75" x2="625.2" y2="340" stroke="#d1d5db" stroke-width="1"/>
+<text x="625.2" y="368.0" font-family="Arial, sans-serif" font-size="13px" text-anchor="middle" fill="#1f2937">100×</text>
+<line x1="732.0" y1="75" x2="732.0" y2="340" stroke="#d1d5db" stroke-width="1"/>
+<text x="732.0" y="368.0" font-family="Arial, sans-serif" font-size="13px" text-anchor="middle" fill="#1f2937">300×</text>
+<text x="92.0" y="145.0" font-family="Arial, sans-serif" font-size="16px" text-anchor="end" fill="#1f2937">Quality</text>
+<rect x="110.0" y="106.0" width="67.4" height="28" rx="4" fill="#2563eb"/>
+<text x="185.4" y="126.0" font-family="Arial, sans-serif" font-size="14px" text-anchor="start" fill="#1f2937">1×</text>
+<rect x="110.0" y="146.0" width="593.4" height="28" rx="4" fill="#f97316"/>
+<text x="711.4" y="166.0" font-family="Arial, sans-serif" font-size="14px" text-anchor="start" fill="#1f2937">224×</text>
+<text x="92.0" y="270.0" font-family="Arial, sans-serif" font-size="16px" text-anchor="end" fill="#1f2937">Score</text>
+<rect x="110.0" y="231.0" width="67.4" height="28" rx="4" fill="#2563eb"/>
+<text x="185.4" y="251.0" font-family="Arial, sans-serif" font-size="14px" text-anchor="start" fill="#1f2937">1×</text>
+<rect x="110.0" y="271.0" width="615.0" height="28" rx="4" fill="#f97316"/>
+<text x="733.0" y="291.0" font-family="Arial, sans-serif" font-size="14px" text-anchor="start" fill="#1f2937">279×</text>
+<rect x="110" y="382" width="14" height="14" fill="#2563eb"/>
+<text x="132.0" y="395.0" font-family="Arial, sans-serif" font-size="13px" text-anchor="start" fill="#1f2937">Jev</text>
+<rect x="280" y="382" width="14" height="14" fill="#f97316"/>
+<text x="302.0" y="395.0" font-family="Arial, sans-serif" font-size="13px" text-anchor="start" fill="#1f2937">GPT-5.6 Luna</text>
+</svg>

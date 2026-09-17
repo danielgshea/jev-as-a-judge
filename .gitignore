@@ -16,6 +16,10 @@ dist/
 
 *.pem
 *.key
+*.crt
 *.p12
 *.pfx
+credentials.json
+token.json
+Cookies*
 .DS_Store
