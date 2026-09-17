@@ -13,9 +13,21 @@ That makes Jev a natural fit for evaluator logic:
 - `Choice` selects one option and returns probabilities and confidence.
 - Multiple atomic questions can be evaluated in parallel against the same state.
 
-This project sends Jev the weather question, the agent's final answer, Tavily evidence, tool calls, and expected behavior. One Jev call checks whether the answer is grounded, whether search behavior matches the example, and whether the response is useful. The evaluator averages those Noul probabilities into a LangSmith score.
+This project sends Jev the weather question, the agent's final answer, Tavily evidence, tool calls, and expected behavior. It runs three judge interactions: Noul checks groundedness, search behavior, and usefulness; Score rates the response on a quality rubric; and Choice classifies the outcome as answered, clarification-needed, or poor. The Noul probabilities become a LangSmith score, while the Score and Choice outputs are recorded as separate metrics.
 
 The point is not that one judge is universally better. Jev gives this evaluator typed, composable signals that are easy to combine, threshold, and inspect.
+
+## Return types and evaluation strategies
+
+Choose the TypeSafe primitive based on the shape of the decision you need to make:
+
+| Return type | What it returns | Evaluation strategy | This project |
+| --- | --- | --- | --- |
+| `Noul` | A `0`–`1` probability that a yes/no statement is true | Threshold it for pass/fail checks, or combine several probabilities into one quality metric | `jev_weather_quality` checks groundedness, search behavior, and usefulness |
+| `Score` | A numeric position on an ordered rubric, plus probabilities and confidence | Rank responses, track regressions, or set quality thresholds against a rubric | `jev_weather_score` rates the answer from poor to excellent |
+| `Choice` | One category, plus probabilities and confidence | Segment outcomes, identify failure modes, or route examples for review | `jev_weather_choice` classifies answers as answered, clarification-needed, or poor |
+
+In practice, use `Noul` for focused invariants, `Score` when quality has meaningful levels, and `Choice` when the next action depends on a discrete outcome. Score and Choice expose confidence, which can identify borderline examples for manual review; Noul is best treated as a probability for a binary decision.
 
 ## Quick start
 
@@ -27,7 +39,7 @@ cp .env.example .env
 uv sync
 ```
 
-Create the LangSmith dataset:
+Optionally create the LangSmith dataset ahead of time:
 
 ```bash
 uv run python src/evals/dataset.py
@@ -50,7 +62,7 @@ The evaluation runner creates the `weather-agent` dataset if it is missing and r
 Run only the sample weather agent directly:
 
 ```bash
-uv run python main.py
+uv run python -m weather_agent.main
 ```
 
 ## Configuration
@@ -79,13 +91,13 @@ DeepAgent -- search_weather --> Tavily evidence
 final answer + evidence + tool calls + expectations
       |
       v
-Jev: grounded? searched correctly? useful?
+Jev: Noul + Score + Choice judges
       |
       v
 LangSmith score and trace
 ```
 
-The JEV interaction is wrapped with LangSmith's `@traceable` decorator as `jev_weather_judge`, so each judge call appears as a nested trace when tracing is enabled.
+Each JEV interaction is wrapped with LangSmith's `@traceable` decorator, so `jev_weather_judge`, `jev_weather_score`, and `jev_weather_choice` appear as nested traces when tracing is enabled.
 
 ## Project layout
 

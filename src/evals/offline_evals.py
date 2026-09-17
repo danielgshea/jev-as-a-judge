@@ -3,7 +3,7 @@ from pprint import pprint
 from langsmith import Client
 
 from evals.dataset import DATASET_NAME, EXAMPLES, ensure_dataset
-from evals.judges import jev_weather_quality
+from evals.judges import jev_weather_choice, jev_weather_quality, jev_weather_score
 from weather_agent.agent import agent
 
 
@@ -45,7 +45,7 @@ def run() -> None:
     results = client.evaluate(
         target,
         data=dataset.id,
-        evaluators=[jev_weather_quality],
+        evaluators=[jev_weather_quality, jev_weather_score, jev_weather_choice],
         experiment_prefix="weather-agent",
         max_concurrency=1,
     )
@@ -56,17 +56,19 @@ def run_local() -> None:
     scores = []
     for index, example in enumerate(EXAMPLES, start=1):
         outputs = target(example["inputs"])
-        evaluation = jev_weather_quality(
-            example["inputs"], outputs, example["outputs"]
-        )
-        scores.append(evaluation["score"])
+        evaluations = {
+            "quality": jev_weather_quality(example["inputs"], outputs, example["outputs"]),
+            "score": jev_weather_score(example["inputs"], outputs, example["outputs"]),
+            "choice": jev_weather_choice(example["inputs"], outputs, example["outputs"]),
+        }
+        scores.append(evaluations["quality"]["score"])
 
         print(f"\nExample {index}/{len(EXAMPLES)}: {example['inputs']['question']}")
         pprint(
             {
                 "answer": outputs["answer"],
                 "tool_calls": outputs["tool_calls"],
-                "evaluation": evaluation,
+                "evaluations": evaluations,
             },
             sort_dicts=False,
         )
