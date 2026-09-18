@@ -8,7 +8,7 @@ The `benchmark-jev-luna-terra-sonnet` experiment replays five fixed weather-agen
 
 ### Float and Binary Scores
 
-These judges returned two feedback scores: a quality score and a did_pass score. The quality score is a floating point value between 0 and 1. The did_pass score is a binary value of 0 or 1.
+These judges returned two feedback scores: an aggregate quality score and a did_pass score. Quality is the mean of three evaluator-returned 0–1 dimensions: groundedness, expected search behavior, and usefulness. The did_pass score is a binary value of 0 or 1.
 
 ### Float quality score
 
@@ -29,7 +29,7 @@ A lower variance score means the scores the judges returned are more consistent.
 
 ### Binary pass/fail score
 
-For `does_pass` (a binary score), variance measures whether an evaluator changes its binary verdict: `p(1-p)`, where `p` is the pass rate. It is `0` when every repetition gives the same verdict and reaches `0.25` at a 50/50 split.
+For `does_pass` (a binary score), the chart uses the observed Bernoulli variance `p(1-p)`, where `p` is the pass rate. It is `0` when every repetition gives the same verdict and reaches `0.25` at a 50/50 split. The script's summary reports the corresponding unbiased sample variance.
 
 Jev and Claude returned the same binary verdict on every case. GPT-5.6 Terra changed only on case 3 (`99%` pass; variance `0.0099`). GPT-5.6 Luna changed on cases 3 and 5 (`91%` and `9%` pass; variance `0.0819` each).
 
@@ -41,7 +41,7 @@ Jev and Claude returned the same binary verdict on every case. GPT-5.6 Terra cha
 
 The float and binary results answer different questions. Float quality scores retain small shifts in evaluator confidence or rating, making model-to-model drift visible: GPT-5.6 Terra had the largest float variance, followed by GPT-5.6 Luna and Claude. Binary scores threshold those shifts into pass/fail decisions, so they can have lower observed variance even when the underlying float judgment moves. That is why GPT-5.6 Terra is highly variable on quality while showing low observed variance on `does_pass`.
 
-In this controlled benchmark, **Jev has the lowest observed variance on the continuous quality metric and zero observed binary variance.** That makes it a useful evaluator when a workflow needs stable, typed signals for ranking, thresholding, or automation. **It does not establish evaluator accuracy or alignment: the benchmark contains five cases and measures repeatability, not agreement with human labels.**
+In this controlled benchmark, **Jev has the lowest observed variance on the continuous quality metric and zero observed binary variance.** That makes it a candidate for workflows that need stable, typed signals for ranking, thresholding, or automation. **Stability alone does not make an evaluator useful:** first validate that its feedback aligns with human reviewers, for example using [LangSmith's process for improving judge evaluator feedback](https://docs.langchain.com/langsmith/improve-judge-evaluator-feedback). This benchmark contains five cases and measures repeatability, not agreement with human labels.
 
 ![Evaluator cost and latency](./assets/benchmark-jev-luna-terra-sonnet/6d08df72-c878-458c-b7c5-a7824ee6e721/cost-and-latency.svg)
 
@@ -56,6 +56,10 @@ The script reports means, standard deviations, bootstrap 95% confidence interval
 ### Cost
 
 The benchmark's evaluator calls cost approximately `$0.34` for Jev, `$0.39` for GPT-5.6 Luna, `$2.90` for GPT-5.6 Terra, and `$28.17` for Claude Sonnet 4.6. Cost and latency are shown above; they depend on the prompts, inputs, and provider pricing at the time of the run.
+
+### Reproducibility
+
+The published benchmark is `benchmark-jev-luna-terra-sonnet` (`6d08df72-c878-458c-b7c5-a7824ee6e721`), started at `2026-09-18T17:53:25Z`. Its [archived frozen cases and analysis](./assets/benchmark-jev-luna-terra-sonnet/6d08df72-c878-458c-b7c5-a7824ee6e721/benchmark.json) reproduce the reported quality variances. LLM judges used LangSmith Gateway with `openai/gpt-5.6-luna`, `openai/gpt-5.6-terra`, and `anthropic/claude-sonnet-4-6`; Jev was accessed through `langchain-typesafe==0.0.1a2`. The run used `deepagents==0.7.15`, `langchain-openai==1.6.2`, `langsmith==0.12.6`, and `tavily-python==0.8.3`. No temperature, top-p, seed, or max-token setting was supplied for the LLM judges, so provider and gateway defaults applied. The hosted Jev service version was not exposed by the experiment metadata. The metadata also lists Gemini Flash; it is not included in this report's figures or analysis.
 
 ## Why Jev for evals?
 
