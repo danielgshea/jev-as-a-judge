@@ -1,14 +1,14 @@
 # Jev as a Judge
 
-This project evaluates a DeepAgents weather agent that uses Tavily to find current conditions and forecasts. The evaluator compares [Jev](https://docs.typesafe.ai/introduction), TypeSafe's flagship System One model, with three LLM judges: GPT-5.6 Luna, GPT-5.6 Terra, and Claude Sonnet 4.6. The goal isn't to determine how *aligned* the evaluators are, but rather to grade their variance.
+This project evaluates a DeepAgents weather agent that uses Tavily to find current conditions and forecasts. The evaluator compares [Jev](https://docs.typesafe.ai/introduction), TypeSafe's flagship System One model, with three autoregressive LLM judges: GPT-5.6 Luna, GPT-5.6 Terra, and Claude Sonnet 4.6. It measures repeatability through score variance; it does not measure alignment with human reviewers.
 
 ## Latest judge reliability result
 
-The `benchmark-jev-luna-terra-sonnet` experiment replays five fixed weather-agent outputs 100 times for each evaluator. The answer, evidence, tool calls, and expected behavior are fixed, so observed variation comes from the evaluators rather than the weather agent.
+The `benchmark-jev-luna-terra-sonnet` experiment replays five fixed weather-agent outputs 100 times for each evaluator. The answer, evidence, tool calls, and expected behavior are fixed, so observed variation comes from the evaluators rather than the weather agent. Expected behavior is a case-specific, human-defined description of a good response—not objective ground truth.
 
-### Float and Binary Scores
+### Continuous and binary scores
 
-These judges returned two feedback scores: an aggregate quality score and a did_pass score. Quality is the mean of three evaluator-returned 0–1 dimensions: groundedness, expected search behavior, and usefulness. The did_pass score is a binary value of 0 or 1.
+Each judge returned two signals: an aggregate `quality` score and a binary `does_pass` score. Quality is the mean of three evaluator-returned 0–1 dimensions: groundedness, expected search behavior, and usefulness. `does_pass` is either `0` or `1`.
 
 ### Float quality score
 
@@ -33,7 +33,7 @@ For `does_pass` (a binary score), the chart uses the observed Bernoulli variance
 
 Jev and Claude returned the same binary verdict on every case. GPT-5.6 Terra changed only on case 3 (`99%` pass; variance `0.0099`). GPT-5.6 Luna changed on cases 3 and 5 (`91%` and `9%` pass; variance `0.0819` each).
 
-![Binary pass/fail variance by frozen case](./assets/benchmark-jev-luna-terra-sonnet/6d08df72-c878-458c-b7c5-a7824ee6e721/does-pass-variance.svg)
+![Binary pass/fail variance by fixed case](./assets/benchmark-jev-luna-terra-sonnet/6d08df72-c878-458c-b7c5-a7824ee6e721/does-pass-variance.svg)
 
 ![Binary pass/fail oscillation across repetitions](./assets/benchmark-jev-luna-terra-sonnet/6d08df72-c878-458c-b7c5-a7824ee6e721/does-pass-oscillation.svg)
 
@@ -41,7 +41,9 @@ Jev and Claude returned the same binary verdict on every case. GPT-5.6 Terra cha
 
 The float and binary results answer different questions. Float quality scores retain small shifts in evaluator confidence or rating, making model-to-model drift visible: GPT-5.6 Terra had the largest float variance, followed by GPT-5.6 Luna and Claude. Binary scores threshold those shifts into pass/fail decisions, so they can have lower observed variance even when the underlying float judgment moves. That is why GPT-5.6 Terra is highly variable on quality while showing low observed variance on `does_pass`.
 
-In this controlled benchmark, **Jev has the lowest observed variance on the continuous quality metric and zero observed binary variance.** That makes it a candidate for workflows that need stable, typed signals for ranking, thresholding, or automation. **Stability alone does not make an evaluator useful:** first validate that its feedback aligns with human reviewers, for example using [LangSmith's process for improving judge evaluator feedback](https://docs.langchain.com/langsmith/improve-judge-evaluator-feedback). This benchmark contains five cases and measures repeatability, not agreement with human labels.
+In this controlled benchmark, **Jev has the lowest observed variance on the continuous quality metric and zero observed binary variance.** That makes it a candidate for workflows that need stable, typed signals for ranking, thresholding, or automation.
+
+Repeatability is not correctness. Before automating decisions with any judge, send representative runs to a LangSmith annotation queue, collect human labels or scores, and compare them with the judge's output. Use the gaps to refine the evaluator's rubric, prompt, and examples. [LangSmith's process for improving judge evaluator feedback](https://docs.langchain.com/langsmith/improve-judge-evaluator-feedback) walks through that workflow. This benchmark contains five cases and measures repeatability, not agreement with human labels.
 
 ![Evaluator cost and latency](./assets/benchmark-jev-luna-terra-sonnet/6d08df72-c878-458c-b7c5-a7824ee6e721/cost-and-latency.svg)
 
@@ -63,12 +65,16 @@ The published benchmark is `benchmark-jev-luna-terra-sonnet` (`6d08df72-c878-458
 
 ## Why Jev for evals?
 
-Traditional LLM judges generate text that an application must interpret. Jev is designed to make structured decisions directly: it evaluates typed questions against structured state and returns typed answers without an explanation-parsing step.
+Autoregressive LLM judges can take a question, trace, and evidence as unstructured input, then use a prompt to evaluate whether the response addressed the user's request. Jev is designed to make structured decisions directly: it evaluates typed questions against structured state and returns typed answers without an explanation-parsing step.
 
 That makes Jev a natural fit for evaluator logic:
 
 - `Noul` returns the probability that a yes/no judgment is true.
+  - E.g.: “Is the final answer grounded in the retrieved evidence?”
+  - Response: A `float` from `0.0` to `1.0`, where `1.0` means fully grounded
 - `Choice` selects one option and returns probabilities and confidence.
+  - E.g.: “Which search outcome best describes this run?”
+  - Response: One of `searched_appropriately`, `searched_unnecessarily`, or `failed_to_search`, plus probabilities and confidence
 - Multiple atomic questions can be evaluated in parallel against the same state.
 
 This project sends every judge the weather question, the agent's final answer, Tavily evidence, tool calls, and expected behavior. Each judge runs three interactions: quality checks groundedness, search behavior, and usefulness; does_pass returns a pass/fail result; and choice classifies the outcome as answered, clarification-needed, or poor. The resulting metrics are stored under model-specific LangSmith keys.
