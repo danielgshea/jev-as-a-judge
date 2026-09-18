@@ -3,8 +3,19 @@ from pprint import pprint
 from langsmith import Client
 
 from evals.dataset import DATASET_NAME, EXAMPLES, ensure_dataset
-from evals.judges import jev_weather_choice, jev_weather_quality, jev_weather_score
+from evals.judges import (
+    LLM_EVALUATORS,
+    jev_weather_choice,
+    jev_weather_does_pass,
+    jev_weather_quality,
+)
 from weather_agent.agent import agent
+
+
+EVALUATORS = {
+    "jev": (jev_weather_quality, jev_weather_does_pass, jev_weather_choice),
+    **LLM_EVALUATORS,
+}
 
 
 def _content(message) -> str:
@@ -45,7 +56,7 @@ def run() -> None:
     results = client.evaluate(
         target,
         data=dataset.id,
-        evaluators=[jev_weather_quality, jev_weather_score, jev_weather_choice],
+        evaluators=[evaluator for group in EVALUATORS.values() for evaluator in group],
         experiment_prefix="weather-agent",
         max_concurrency=1,
     )
@@ -57,11 +68,16 @@ def run_local() -> None:
     for index, example in enumerate(EXAMPLES, start=1):
         outputs = target(example["inputs"])
         evaluations = {
-            "quality": jev_weather_quality(example["inputs"], outputs, example["outputs"]),
-            "score": jev_weather_score(example["inputs"], outputs, example["outputs"]),
-            "choice": jev_weather_choice(example["inputs"], outputs, example["outputs"]),
+            judge: {
+                "quality": quality(example["inputs"], outputs, example["outputs"]),
+                "does_pass": does_pass(example["inputs"], outputs, example["outputs"]),
+                "choice": choice(example["inputs"], outputs, example["outputs"]),
+            }
+            for judge, (quality, does_pass, choice) in EVALUATORS.items()
         }
-        scores.append(evaluations["quality"]["score"])
+        scores.extend(
+            evaluation["quality"]["score"] for evaluation in evaluations.values()
+        )
 
         print(f"\nExample {index}/{len(EXAMPLES)}: {example['inputs']['question']}")
         pprint(

@@ -1,25 +1,51 @@
 # Jev as a Judge
 
-This project evaluates a DeepAgents weather agent that uses Tavily to find current conditions and forecasts. The evaluator is powered by [Jev](https://docs.typesafe.ai/introduction), TypeSafe's flagship System One model. The same evaluators were built with Jev and a GPT model. Both evaluators were used in an experiment. The goal wasn't to determine how *aligned* the evaluators were, but rather to grade their variance.
+This project evaluates a DeepAgents weather agent that uses Tavily to find current conditions and forecasts. The evaluator compares [Jev](https://docs.typesafe.ai/introduction), TypeSafe's flagship System One model, with three LLM judges: GPT-5.6 Luna, GPT-5.6 Terra, and Claude Sonnet 4.6. The goal isn't to determine how *aligned* the evaluators are, but rather to grade their variance.
 
 ## Latest judge reliability result
 
-We ran 100 judge repetitions on the same five frozen agent outputs, so the measured variation comes from the judges rather than the weather agent or web search.
+The `benchmark-jev-luna-terra-sonnet` experiment replays five fixed weather-agent outputs 100 times for each evaluator. The answer, evidence, tool calls, and expected behavior are fixed, so observed variation comes from the evaluators rather than the weather agent.
 
-Variance measures how much a judge's repeated ratings move around on the same answer. Lower variance means a more consistent judge. The ratio shows how much more the GPT judge's ratings varied than Jev's.
+### Float and Binary Scores
 
-| Metric | What it means | Jev average | GPT average | GPT variance vs. Jev |
-| --- | --- | ---: | ---: | ---: |
-| Quality | Average of groundedness, search behavior, and usefulness checks, each from 0 to 1 | 0.926 | 0.980 | 224× higher |
-| Score | A 0–1 version of the poor / adequate / excellent rubric | 0.618 | 0.798 | 279× higher |
+These judges returned two feedback scores: a quality score and a did_pass score. The quality score is a floating point value between 0 and 1. The did_pass score is a binary value of 0 or 1.
 
-The reliability result is the spread. GPT's quality ratings varied 224× more and its rubric scores varied 279× more. Outcome disagreement was 0% for Jev and 0.2% for GPT.
+### Float quality score
 
-![Relative variance of repeated judge ratings](./variance_comparison.png)
+A lower variance score means the scores the judges returned are more consistent. Jev's mean per-case sample variance was `0.0000149`; the LLM judges were `92×` to `913×` higher in this benchmark.
 
-![Judge scores across 100 repetitions](./score_repetitions.png)
+| Evaluator | Mean quality variance | Relative to Jev |
+| --- | ---: | ---: |
+| Jev | 0.0000149 | 1× |
+| GPT-5.6 Luna | 0.00647 | 433× |
+| GPT-5.6 Terra | 0.01364 | 913× |
+| Claude Sonnet 4.6 | 0.00137 | 92× |
 
-The 100-repetition run is recorded in [LangSmith](https://smith.langchain.com/o/fd6b1198-8e6a-4f06-80f5-20e1b40ded12/datasets/fc68427d-1695-49eb-901b-fb4c733c24bc/compare?selectedSessions=ff3d8aa4-28c4-482e-aa54-1ff1f2b604ba). One LLM request timed out, so treat these numbers as preliminary. Results are based on five cases, not a universal ranking of judges. Run it again with:
+![Relative variance of repeated quality scores](./assets/benchmark-jev-luna-terra-sonnet/6d08df72-c878-458c-b7c5-a7824ee6e721/variance-ratios.svg)
+
+![Quality-score distribution across repetitions](./assets/benchmark-jev-luna-terra-sonnet/6d08df72-c878-458c-b7c5-a7824ee6e721/quality-by-repetition.svg)
+
+![Quality-score oscillation across repetitions](./assets/benchmark-jev-luna-terra-sonnet/6d08df72-c878-458c-b7c5-a7824ee6e721/quality-oscillation.svg)
+
+### Binary pass/fail score
+
+For `does_pass` (a binary score), variance measures whether an evaluator changes its binary verdict: `p(1-p)`, where `p` is the pass rate. It is `0` when every repetition gives the same verdict and reaches `0.25` at a 50/50 split.
+
+Jev and Claude returned the same binary verdict on every case. GPT-5.6 Terra changed only on case 3 (`99%` pass; variance `0.0099`). GPT-5.6 Luna changed on cases 3 and 5 (`91%` and `9%` pass; variance `0.0819` each).
+
+![Binary pass/fail variance by frozen case](./assets/benchmark-jev-luna-terra-sonnet/6d08df72-c878-458c-b7c5-a7824ee6e721/does-pass-variance.svg)
+
+![Binary pass/fail oscillation across repetitions](./assets/benchmark-jev-luna-terra-sonnet/6d08df72-c878-458c-b7c5-a7824ee6e721/does-pass-oscillation.svg)
+
+### What this means for Jev
+
+The float and binary results answer different questions. Float quality scores retain small shifts in evaluator confidence or rating, making model-to-model drift visible: GPT-5.6 Terra had the largest float variance, followed by GPT-5.6 Luna and Claude. Binary scores threshold those shifts into pass/fail decisions, so they can have lower observed variance even when the underlying float judgment moves. That is why GPT-5.6 Terra is highly variable on quality while showing low observed variance on `does_pass`.
+
+In this controlled benchmark, **Jev has the lowest observed variance on the continuous quality metric and zero observed binary variance.** That makes it a useful evaluator when a workflow needs stable, typed signals for ranking, thresholding, or automation. **It does not establish evaluator accuracy or alignment: the benchmark contains five cases and measures repeatability, not agreement with human labels.**
+
+![Evaluator cost and latency](./assets/benchmark-jev-luna-terra-sonnet/6d08df72-c878-458c-b7c5-a7824ee6e721/cost-and-latency.svg)
+
+Run the benchmark again with:
 
 ```bash
 uv run python src/evals/judge_reliability.py
@@ -29,7 +55,7 @@ The script reports means, standard deviations, bootstrap 95% confidence interval
 
 ### Cost
 
-For the older 100-repetition experiment, Jev cost `$0.30` and GPT-5.6 Luna cost about `$0.36`. Jev was **17% cheaper** than GPT for this run, according to the provider-reported Jev total and LangSmith Gateway usage metadata.
+The benchmark's evaluator calls cost approximately `$0.34` for Jev, `$0.39` for GPT-5.6 Luna, `$2.90` for GPT-5.6 Terra, and `$28.17` for Claude Sonnet 4.6. Cost and latency are shown above; they depend on the prompts, inputs, and provider pricing at the time of the run.
 
 ## Why Jev for evals?
 
@@ -38,11 +64,10 @@ Traditional LLM judges generate text that an application must interpret. Jev is 
 That makes Jev a natural fit for evaluator logic:
 
 - `Noul` returns the probability that a yes/no judgment is true.
-- `Score` rates an answer against an ordered rubric and returns probabilities and confidence.
 - `Choice` selects one option and returns probabilities and confidence.
 - Multiple atomic questions can be evaluated in parallel against the same state.
 
-This project sends Jev the weather question, the agent's final answer, Tavily evidence, tool calls, and expected behavior. It runs three judge interactions: Noul checks groundedness, search behavior, and usefulness; Score rates the response on a quality rubric; and Choice classifies the outcome as answered, clarification-needed, or poor. The Noul probabilities become a LangSmith score, while the Score and Choice outputs are recorded as separate metrics.
+This project sends every judge the weather question, the agent's final answer, Tavily evidence, tool calls, and expected behavior. Each judge runs three interactions: quality checks groundedness, search behavior, and usefulness; does_pass returns a pass/fail result; and choice classifies the outcome as answered, clarification-needed, or poor. The resulting metrics are stored under model-specific LangSmith keys.
 
 The point is not that one judge is universally better. Jev gives this evaluator typed, composable signals that are easy to combine, threshold, and inspect.
 
@@ -53,10 +78,9 @@ Choose the TypeSafe primitive based on the shape of the decision you need to mak
 | Return type | What it returns | Evaluation strategy | This project |
 | --- | --- | --- | --- |
 | `Noul` | A `0`–`1` probability that a yes/no statement is true | Threshold it for pass/fail checks, or combine several probabilities into one quality metric | `jev_weather_quality` checks groundedness, search behavior, and usefulness |
-| `Score` | A numeric position on an ordered rubric, plus probabilities and confidence | Rank responses, track regressions, or set quality thresholds against a rubric | `jev_weather_score` rates the answer from poor to excellent |
 | `Choice` | One category, plus probabilities and confidence | Segment outcomes, identify failure modes, or route examples for review | `jev_weather_choice` classifies answers as answered, clarification-needed, or poor |
 
-In practice, use `Noul` for focused invariants, `Score` when quality has meaningful levels, and `Choice` when the next action depends on a discrete outcome. Score and Choice expose confidence, which can identify borderline examples for manual review; Noul is best treated as a probability for a binary decision.
+In practice, use `Noul` for focused invariants and `Choice` when the next action depends on a discrete outcome. Choice exposes confidence, which can identify borderline examples for manual review; Noul is best treated as a probability for a binary decision.
 
 ## Quick start
 
@@ -74,7 +98,7 @@ Optionally create the LangSmith dataset ahead of time:
 uv run python src/evals/dataset.py
 ```
 
-Run the local weather-agent evaluation. This uses the examples in `src/evals/dataset.py`, pretty-prints each Jev result, and does not require the dataset to exist in LangSmith:
+Run the local weather-agent evaluation. This uses the examples in `src/evals/dataset.py`, pretty-prints every judge result, and does not require the dataset to exist in LangSmith:
 
 ```bash
 uv run python main.py
@@ -102,11 +126,20 @@ The main settings are in `.env`:
 | --- | --- |
 | `TAVILY_API_KEY` | Web search used by `search_weather` |
 | `TYPESAFE_API_KEY` | Jev evaluator access |
-| `LANGSMITH_API_KEY` | LangSmith, Gateway, dataset, and evaluation access |
+| `LANGSMITH_API_KEY` | LangSmith tracing, datasets, and evaluation access |
+| `LS_LLM_GATEWAY_KEY` | LLM Gateway model invocation |
 | `LANGSMITH_GATEWAY` | Routes the weather agent through LangSmith Gateway; set to `true` |
 | `LANGSMITH_TRACING` | Enables LangSmith traces; set to `true` |
 | `LANGSMITH_PROJECT` | LangSmith project for traces |
 | `WEATHER_AGENT_MODEL` | Model string, defaulting to `openai:gpt-5.5` |
+
+The judge labels and gateway model identifiers are:
+
+| Label | Model identifier | Credential |
+| --- | --- | --- |
+| GPT-5.6 Luna | `openai/gpt-5.6-luna` | `LANGSMITH_API_KEY` |
+| GPT-5.6 Terra | `openai/gpt-5.6-terra` | `LANGSMITH_API_KEY` |
+| Claude Sonnet 4.6 | `anthropic/claude-sonnet-4-6` | `LS_LLM_GATEWAY_KEY` |
 
 ## How the evaluation is wired
 
@@ -120,19 +153,20 @@ DeepAgent -- search_weather --> Tavily evidence
 final answer + evidence + tool calls + expectations
       |
       v
-Jev: Noul + Score + Choice judges
+Jev + three LLM judges: quality + does_pass + choice
       |
       v
 LangSmith score and trace
 ```
 
-Each Jev interaction is wrapped with LangSmith's `@traceable` decorator, so `jev_weather_judge`, `jev_weather_score`, and `jev_weather_choice` appear as nested traces when tracing is enabled.
+Each judge interaction is wrapped with LangSmith's `@traceable` decorator, so model-specific quality, pass/fail, and outcome traces appear when tracing is enabled.
 
 ## Project layout
 
 - `src/weather_agent/agent.py` — DeepAgents weather agent and Tavily tool.
 - `src/evals/dataset.py` — Creates the `weather-agent` LangSmith dataset.
-- `src/evals/judges.py` — Jev-based evaluator and typed questions.
+- `src/evals/judges/` — Jev and LLM evaluators.
+- `analysis/` — Dynamic experiment visualizations and trace-metric queries.
 - `src/evals/offline_evals.py` — Runs the agent over the dataset and uploads results.
 - `langgraph.json` — Registers the weather agent for LangGraph tooling.
 
@@ -142,7 +176,6 @@ Each Jev interaction is wrapped with LangSmith's `@traceable` decorator, so `jev
 - [TypeSafe Python quick start](https://docs.typesafe.ai/introduction/quickstart)
 - [TypeSafe primitives](https://docs.typesafe.ai/primitives)
 - [Noul](https://docs.typesafe.ai/primitives/noul)
-- [Score](https://docs.typesafe.ai/primitives/score)
 - [Confidence](https://docs.typesafe.ai/confidence)
 - [TypeSafe API reference](https://docs.typesafe.ai/api)
 - [LangSmith evaluation quickstart](https://docs.langchain.com/langsmith/evaluation-quickstart)

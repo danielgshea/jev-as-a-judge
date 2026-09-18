@@ -10,7 +10,7 @@ dependencies = [
     "langsmith>=0.3.0",
     "python-dotenv>=1.0.0",
     "tavily-python>=0.5.0",
-    "typesafe-sdk>=0.6.0",
+    "langchain-typesafe>=0.0.1a2",
 ]
 
 [tool.uv]

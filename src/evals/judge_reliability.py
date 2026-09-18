@@ -1,6 +1,5 @@
 import argparse
 import json
-import os
 import random
 import statistics
 from collections import Counter
@@ -10,7 +9,7 @@ from dotenv import load_dotenv
 
 load_dotenv(override=True)
 
-JUDGES = ("jev", "llm")
+JUDGES = ("jev", "gpt_luna", "gpt_terra", "claude_sonnet")
 FROZEN_OUTPUT_KEY = "_frozen_output"
 BOOTSTRAP_SAMPLES = 10_000
 
@@ -56,12 +55,17 @@ def _categorical_summary(values: list[str]) -> dict:
     }
 
 
+def _judge_metric(key: str) -> tuple[str, str] | None:
+    judge, separator, metric = key.partition("_weather_")
+    return (judge, metric) if separator and judge in JUDGES else None
+
+
 def _summarize(records: list[dict], case_count: int) -> dict:
     summary = {}
     case_values = {}
     for judge in JUDGES:
         summary[judge] = {}
-        for metric in ("quality", "score"):
+        for metric in ("quality", "does_pass"):
             values_by_case = [
                 [record[judge][metric] for record in records if record["case"] == case]
                 for case in range(case_count)
@@ -72,7 +76,7 @@ def _summarize(records: list[dict], case_count: int) -> dict:
             pooled_values = [value for values in values_by_case for value in values]
             summary[judge][metric] = {
                 "mean": statistics.mean(pooled_values),
-                "stddev": statistics.stdev(pooled_values),
+                "stddev": statistics.stdev(pooled_values) if len(pooled_values) > 1 else 0.0,
                 "mean_variance": statistics.mean(variances),
                 "max_variance": max(variances),
                 "mean_95_ci": _bootstrap_ci(case_means, statistics.mean, 101),
@@ -93,49 +97,59 @@ def _summarize(records: list[dict], case_count: int) -> dict:
             ),
         }
 
-    comparison = {}
-    for metric in ("quality", "score"):
-        jev_variance = summary["jev"][metric]["mean_variance"]
-        llm_variance = summary["llm"][metric]["mean_variance"]
-        jev_means = [statistics.mean(values) for values in case_values["jev", metric]]
-        llm_means = [statistics.mean(values) for values in case_values["llm", metric]]
-        jev_variances = [
-            _sample_variance(values) for values in case_values["jev", metric]
-        ]
-        llm_variances = [
-            _sample_variance(values) for values in case_values["llm", metric]
-        ]
-        mean_differences = [
-            llm_mean - jev_mean for llm_mean, jev_mean in zip(llm_means, jev_means)
-        ]
-        variance_differences = [
-            llm_variance - jev_variance
-            for llm_variance, jev_variance in zip(llm_variances, jev_variances)
-        ]
-        comparison[metric] = {
-            "jev_mean_variance": jev_variance,
-            "llm_mean_variance": llm_variance,
-            "llm_to_jev_variance_ratio": (
-                llm_variance / jev_variance if jev_variance else None
-            ),
-            "mean_difference_llm_minus_jev": statistics.mean(mean_differences),
-            "mean_difference_95_ci": _bootstrap_ci(
-                mean_differences, statistics.mean, 201
-            ),
-            "variance_difference_llm_minus_jev": statistics.mean(variance_differences),
-            "variance_difference_95_ci": _bootstrap_ci(
-                variance_differences, statistics.mean, 202
-            ),
-            "variance_ratio_95_ci": _bootstrap_ci(
-                list(zip(jev_variances, llm_variances)),
-                lambda pairs: (
-                    sum(llm for _, llm in pairs) / sum(jev for jev, _ in pairs)
-                    if sum(jev for jev, _ in pairs)
-                    else None
+    comparison = {judge: {} for judge in JUDGES[1:]}
+    for judge in JUDGES[1:]:
+        for metric in ("quality", "does_pass"):
+            jev_variance = summary["jev"][metric]["mean_variance"]
+            judge_variance = summary[judge][metric]["mean_variance"]
+            jev_means = [
+                statistics.mean(values) for values in case_values["jev", metric]
+            ]
+            judge_means = [
+                statistics.mean(values) for values in case_values[judge, metric]
+            ]
+            jev_variances = [
+                _sample_variance(values) for values in case_values["jev", metric]
+            ]
+            judge_variances = [
+                _sample_variance(values) for values in case_values[judge, metric]
+            ]
+            mean_differences = [
+                judge_mean - jev_mean
+                for judge_mean, jev_mean in zip(judge_means, jev_means)
+            ]
+            variance_differences = [
+                judge_variance - jev_variance
+                for judge_variance, jev_variance in zip(
+                    judge_variances, jev_variances
+                )
+            ]
+            comparison[judge][metric] = {
+                "jev_mean_variance": jev_variance,
+                "judge_mean_variance": judge_variance,
+                "judge_to_jev_variance_ratio": (
+                    judge_variance / jev_variance if jev_variance else None
                 ),
-                203,
-            ),
-        }
+                "mean_difference_judge_minus_jev": statistics.mean(mean_differences),
+                "mean_difference_95_ci": _bootstrap_ci(
+                    mean_differences, statistics.mean, 201
+                ),
+                "variance_difference_judge_minus_jev": statistics.mean(
+                    variance_differences
+                ),
+                "variance_difference_95_ci": _bootstrap_ci(
+                    variance_differences, statistics.mean, 202
+                ),
+                "variance_ratio_95_ci": _bootstrap_ci(
+                    list(zip(jev_variances, judge_variances)),
+                    lambda pairs: (
+                        sum(judge for _, judge in pairs) / sum(jev for jev, _ in pairs)
+                        if sum(jev for jev, _ in pairs)
+                        else None
+                    ),
+                    203,
+                ),
+            }
     return {
         "analysis": {
             "variance_definition": "unbiased sample variance within each frozen case",
@@ -150,17 +164,15 @@ def _summarize(records: list[dict], case_count: int) -> dict:
 
 def _evaluators() -> dict:
     from evals.judges import (
+        LLM_EVALUATORS,
         jev_weather_choice,
+        jev_weather_does_pass,
         jev_weather_quality,
-        jev_weather_score,
-        llm_weather_choice,
-        llm_weather_quality,
-        llm_weather_score,
     )
 
     return {
-        "jev": (jev_weather_quality, jev_weather_score, jev_weather_choice),
-        "llm": (llm_weather_quality, llm_weather_score, llm_weather_choice),
+        "jev": (jev_weather_quality, jev_weather_does_pass, jev_weather_choice),
+        **LLM_EVALUATORS,
     }
 
 
@@ -179,13 +191,13 @@ def _local_records(trials: int) -> tuple[list[dict], int]:
         for case, (example, outputs) in enumerate(frozen_cases):
             record = {"case": case, "trial": trial + 1}
             for judge in JUDGES:
-                quality, score, choice = (
+                quality, does_pass, choice = (
                     evaluator(example["inputs"], outputs, example["outputs"])
                     for evaluator in evaluators[judge]
                 )
                 record[judge] = {
                     "quality": quality["score"],
-                    "score": score["score"],
+                    "does_pass": does_pass["score"],
                     "choice": choice["value"],
                 }
             records.append(record)
@@ -221,9 +233,10 @@ def _remote_examples(client) -> list:
     ]
 
 
-def run_langsmith(trials: int) -> dict:
+def run_langsmith(trials: int, max_concurrency: int = 2) -> dict:
     from langsmith import Client
     from langsmith.evaluation import evaluate
+    from evals.judges import LLM_JUDGES
 
     client = Client()
     examples = _remote_examples(client)
@@ -235,11 +248,11 @@ def run_langsmith(trials: int) -> dict:
         num_repetitions=trials,
         client=client,
         experiment_prefix="judge-reliability",
-        description="Compare Jev and LLM judge variance on frozen weather-agent outputs.",
+        description="Compare Jev and three LLM judge variances on frozen weather-agent outputs.",
         metadata={
-            "judge_model": os.getenv("LLM_JUDGE_MODEL", "gpt-5.6-luna"),
+            "judge_models": {key: config.model for key, config in LLM_JUDGES.items()},
         },
-        max_concurrency=2,
+        max_concurrency=max_concurrency,
     )
     records = []
     for row in results:
@@ -252,7 +265,10 @@ def run_langsmith(trials: int) -> dict:
         )
         for result in result_items:
             key = result.key if hasattr(result, "key") else result["key"]
-            judge, metric = key.split("_weather_", 1)
+            judge_metric = _judge_metric(key)
+            if judge_metric is None:
+                continue
+            judge, metric = judge_metric
             value = result.value if hasattr(result, "value") else result["value"]
             score = result.score if hasattr(result, "score") else result["score"]
             record.setdefault(judge, {})["choice" if metric == "outcome" else metric] = (
@@ -280,11 +296,18 @@ def run_local(trials: int) -> dict:
 def main() -> None:
     parser = argparse.ArgumentParser(description="Compare Jev and LLM judge reliability.")
     parser.add_argument("--trials", type=int, default=100)
+    parser.add_argument("--max-concurrency", type=int, default=2)
     parser.add_argument("--local", action="store_true")
     args = parser.parse_args()
-    if args.trials < 2:
-        parser.error("--trials must be at least 2")
-    result = run_local(args.trials) if args.local else run_langsmith(args.trials)
+    if args.trials < 1:
+        parser.error("--trials must be at least 1")
+    if args.max_concurrency < 1:
+        parser.error("--max-concurrency must be at least 1")
+    result = (
+        run_local(args.trials)
+        if args.local
+        else run_langsmith(args.trials, args.max_concurrency)
+    )
     print(json.dumps(result, indent=2, sort_keys=True))
 
 
