@@ -8,7 +8,7 @@ The `benchmark-jev-luna-terra-sonnet` offline judge experiment replays five fixe
 
 Each judge returns an aggregate `quality` score and a binary `does_pass` score. Quality is the mean of groundedness, expected search behavior, and usefulness. A single human reviewer labeled those same three fields plus pass/fail for each frozen response; the labels are in [oracle-labels.json](./assets/benchmark-jev-luna-terra-sonnet/6d08df72-c878-458c-b7c5-a7824ee6e721/oracle-labels.json).
 
-### Accuracy against the human oracle
+### Accuracy
 
 Pass/fail accuracy compares all 500 repeated decisions per judge with the fixed human label. Quality is continuous, so the experiment reports mean absolute error (MAE; lower is better) and the share of scores within ±0.10 of the human quality score.
 
@@ -27,7 +27,7 @@ Accuracy and precision answer different questions: accuracy measures agreement w
 
 ![Human-oracle quality agreement](./assets/benchmark-jev-luna-terra-sonnet-oracle/6d08df72-c878-458c-b7c5-a7824ee6e721/quality-agreement.svg)
 
-### Repeatability
+### Reliability
 
 A lower variance means a judge returns more consistent scores for the same frozen case. That consistency makes observed accuracy more dependable over repeated production decisions, especially near a pass/fail threshold where score noise can flip a verdict. Variance alone is not accuracy, however: a judge can be consistently wrong. Jev's mean per-case quality variance was `0.0000149`; the LLM judges were `92×` to `913×` higher in this offline judge experiment.
 
@@ -49,6 +49,17 @@ For `does_pass`, the observed Bernoulli variance is `p(1-p)`: zero means every r
 ![Binary pass/fail variance by frozen case](./assets/benchmark-jev-luna-terra-sonnet-oracle/6d08df72-c878-458c-b7c5-a7824ee6e721/does-pass-variance.svg)
 
 ![Binary pass/fail oscillation across repetitions](./assets/benchmark-jev-luna-terra-sonnet-oracle/6d08df72-c878-458c-b7c5-a7824ee6e721/does-pass-oscillation.svg)
+
+### Cost
+
+| Judge | Average cost per call | Average latency | Total evaluator cost |
+| --- | ---: | ---: | ---: |
+| Jev | $0.00035 | 0.44 s | $0.34 |
+| GPT-5.6 Luna | $0.00039 | 2.50 s | $0.39 |
+| GPT-5.6 Terra | $0.00289 | 2.83 s | $2.90 |
+| Claude Sonnet 4.6 | $0.02811 | 2.16 s | $28.17 |
+
+At $0.00035 per call in this experiment, Jev made repeated judgments and frequent regression checks inexpensive. These costs depend on the prompts, inputs, and provider pricing at the time of the run.
 
 ![Judge cost and latency](./assets/benchmark-jev-luna-terra-sonnet-oracle/6d08df72-c878-458c-b7c5-a7824ee6e721/cost-and-latency.svg)
 
