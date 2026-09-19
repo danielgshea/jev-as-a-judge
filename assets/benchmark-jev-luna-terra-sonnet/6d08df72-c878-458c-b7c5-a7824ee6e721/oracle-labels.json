@@ -1,0 +1,69 @@
+{
+  "labels": [
+    {
+      "question": "What is the forecast for Tokyo next week?",
+      "is_grounded": 1,
+      "matches_search_expectation": 1, 
+      "is_useful": 1,
+      "does_pass": 1,
+      "reasoning": {
+        "is_grounded": "Forecast claims are tied to retrieved sources, and the answer explicitly limits claims where the evidence lacks reliable daily temperatures.",
+        "matches_search_expectation": "The agent searched before answering the unambiguous Tokyo request.",
+        "is_useful": "It gives the location, requested week, forecast details, source links, and practical advice.",
+        "does_pass": "The response is grounded, follows the required search behavior, and answers the request usefully."
+      }
+    },
+    {
+      "question": "What is the weather in Seattle today?",
+      "is_grounded": 1,
+      "matches_search_expectation": 1,
+      "is_useful": 1,
+      "does_pass": 1,
+      "reasoning": {
+        "is_grounded": "Every reported condition is supported by the retrieved WeatherAPI result.",
+        "matches_search_expectation": "The agent searched before answering the unambiguous Seattle request.",
+        "is_useful": "It provides current conditions, temperature, rain chance, wind, and a source.",
+        "does_pass": "The response is grounded, follows the required search behavior, and answers the request usefully."
+      }
+    },
+    {
+      "question": "What is the weather in Springfield today?",
+      "is_grounded": 1,
+      "matches_search_expectation": 1,
+      "is_useful": 1,
+      "does_pass": 1,
+      "reasoning": {
+        "is_grounded": "The response makes no unsupported weather claim.",
+        "matches_search_expectation": "Springfield is ambiguous, so the expected behavior is to ask for clarification without searching.",
+        "is_useful": "It clearly requests the missing location detail and gives examples of possible Springfields.",
+        "does_pass": "The clarification is the expected and useful response for this ambiguous request."
+      }
+    },
+    {
+      "question": "What will the weather be like in Austin, Texas this weekend?",
+      "is_grounded": 1,
+      "matches_search_expectation": 1,
+      "is_useful": 1,
+      "does_pass": 1,
+      "reasoning": {
+        "is_grounded": "The weekend forecast details are supported by the retrieved National Weather Service forecast.",
+        "matches_search_expectation": "The agent searched before answering the unambiguous Austin request.",
+        "is_useful": "It gives both weekend days, temperatures, heat risk, precipitation guidance, and a source link.",
+        "does_pass": "The response is grounded, follows the required search behavior, and answers the request usefully."
+      }
+    },
+    {
+      "question": "Will I need an umbrella in Dublin tomorrow?",
+      "is_grounded": 1,
+      "matches_search_expectation": 0,
+      "is_useful": 1,
+      "does_pass": 0,
+      "reasoning": {
+        "is_grounded": "The response makes no unsupported weather claim.",
+        "matches_search_expectation": "The reference output requires a search, but the agent did not call the search tool.",
+        "is_useful": "It clearly identifies the location ambiguity and asks the user to resolve it.",
+        "does_pass": "Despite being a reasonable clarification, it fails the experiment's required-search behavior."
+      }
+    }
+  ]
+}

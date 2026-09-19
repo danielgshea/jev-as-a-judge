@@ -1,0 +1,83 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="514" viewBox="0 0 1000 514">
+<rect width="100%" height="100%" fill="#030710"/>
+<text x="500.0" y="32.0" font-family="Lausanne, Inter, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="22px" text-anchor="middle" fill="#FFFFFF">Binary pass/fail variance by frozen case</text>
+<text x="500.0" y="56.0" font-family="Lausanne, Inter, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="14px" text-anchor="middle" fill="#FFFFFF">Each dot is one case; 0 is stable and 0.25 is a 50/50 pass/fail split</text>
+<line x1="190.0" y1="105" x2="190.0" y2="409" stroke="#1A2740" stroke-width="1"/>
+<text x="190.0" y="429.0" font-family="Lausanne, Inter, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="12px" text-anchor="middle" fill="#FFFFFF">0.00</text>
+<line x1="344.0" y1="105" x2="344.0" y2="409" stroke="#1A2740" stroke-width="1"/>
+<text x="344.0" y="429.0" font-family="Lausanne, Inter, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="12px" text-anchor="middle" fill="#FFFFFF">0.05</text>
+<line x1="498.0" y1="105" x2="498.0" y2="409" stroke="#1A2740" stroke-width="1"/>
+<text x="498.0" y="429.0" font-family="Lausanne, Inter, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="12px" text-anchor="middle" fill="#FFFFFF">0.10</text>
+<line x1="652.0" y1="105" x2="652.0" y2="409" stroke="#1A2740" stroke-width="1"/>
+<text x="652.0" y="429.0" font-family="Lausanne, Inter, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="12px" text-anchor="middle" fill="#FFFFFF">0.15</text>
+<line x1="806.0" y1="105" x2="806.0" y2="409" stroke="#1A2740" stroke-width="1"/>
+<text x="806.0" y="429.0" font-family="Lausanne, Inter, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="12px" text-anchor="middle" fill="#FFFFFF">0.20</text>
+<line x1="960.0" y1="105" x2="960.0" y2="409" stroke="#1A2740" stroke-width="1"/>
+<text x="960.0" y="429.0" font-family="Lausanne, Inter, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="12px" text-anchor="middle" fill="#FFFFFF">0.25</text>
+<text x="178.0" y="148.0" font-family="Lausanne, Inter, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="12px" text-anchor="end" fill="#FFFFFF">Jev</text>
+<line x1="190" y1="119" x2="190.0" y2="119" stroke="#7FC8FF" stroke-width="2"/>
+<circle cx="190.0" cy="119" r="5" fill="#7FC8FF"/>
+<text x="198.0" y="123.0" font-family="Lausanne, Inter, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="10px" text-anchor="start" fill="#FFFFFF">C1 100%</text>
+<line x1="190" y1="131" x2="190.0" y2="131" stroke="#E3FF8F" stroke-width="2"/>
+<circle cx="190.0" cy="131" r="5" fill="#E3FF8F"/>
+<text x="198.0" y="135.0" font-family="Lausanne, Inter, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="10px" text-anchor="start" fill="#FFFFFF">C2 100%</text>
+<line x1="190" y1="143" x2="190.0" y2="143" stroke="#B27D75" stroke-width="2"/>
+<circle cx="190.0" cy="143" r="5" fill="#B27D75"/>
+<text x="198.0" y="147.0" font-family="Lausanne, Inter, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="10px" text-anchor="start" fill="#FFFFFF">C3 100%</text>
+<line x1="190" y1="155" x2="190.0" y2="155" stroke="#C78EAD" stroke-width="2"/>
+<circle cx="190.0" cy="155" r="5" fill="#C78EAD"/>
+<text x="198.0" y="159.0" font-family="Lausanne, Inter, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="10px" text-anchor="start" fill="#FFFFFF">C4 100%</text>
+<line x1="190" y1="167" x2="190.0" y2="167" stroke="#D5C3F7" stroke-width="2"/>
+<circle cx="190.0" cy="167" r="5" fill="#D5C3F7"/>
+<text x="198.0" y="171.0" font-family="Lausanne, Inter, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="10px" text-anchor="start" fill="#FFFFFF">C5 0%</text>
+<text x="178.0" y="224.0" font-family="Lausanne, Inter, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="12px" text-anchor="end" fill="#FFFFFF">GPT-5.6 Luna</text>
+<line x1="190" y1="195" x2="190.0" y2="195" stroke="#7FC8FF" stroke-width="2"/>
+<circle cx="190.0" cy="195" r="5" fill="#7FC8FF"/>
+<text x="198.0" y="199.0" font-family="Lausanne, Inter, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="10px" text-anchor="start" fill="#FFFFFF">C1 100%</text>
+<line x1="190" y1="207" x2="190.0" y2="207" stroke="#E3FF8F" stroke-width="2"/>
+<circle cx="190.0" cy="207" r="5" fill="#E3FF8F"/>
+<text x="198.0" y="211.0" font-family="Lausanne, Inter, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="10px" text-anchor="start" fill="#FFFFFF">C2 100%</text>
+<line x1="190" y1="219" x2="442.3" y2="219" stroke="#B27D75" stroke-width="2"/>
+<circle cx="442.3" cy="219" r="5" fill="#B27D75"/>
+<text x="450.3" y="223.0" font-family="Lausanne, Inter, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="10px" text-anchor="start" fill="#FFFFFF">C3 91%</text>
+<line x1="190" y1="231" x2="190.0" y2="231" stroke="#C78EAD" stroke-width="2"/>
+<circle cx="190.0" cy="231" r="5" fill="#C78EAD"/>
+<text x="198.0" y="235.0" font-family="Lausanne, Inter, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="10px" text-anchor="start" fill="#FFFFFF">C4 100%</text>
+<line x1="190" y1="243" x2="442.3" y2="243" stroke="#D5C3F7" stroke-width="2"/>
+<circle cx="442.3" cy="243" r="5" fill="#D5C3F7"/>
+<text x="450.3" y="247.0" font-family="Lausanne, Inter, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="10px" text-anchor="start" fill="#FFFFFF">C5 9%</text>
+<text x="178.0" y="300.0" font-family="Lausanne, Inter, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="12px" text-anchor="end" fill="#FFFFFF">GPT-5.6 Terra</text>
+<line x1="190" y1="271" x2="190.0" y2="271" stroke="#7FC8FF" stroke-width="2"/>
+<circle cx="190.0" cy="271" r="5" fill="#7FC8FF"/>
+<text x="198.0" y="275.0" font-family="Lausanne, Inter, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="10px" text-anchor="start" fill="#FFFFFF">C1 100%</text>
+<line x1="190" y1="283" x2="190.0" y2="283" stroke="#E3FF8F" stroke-width="2"/>
+<circle cx="190.0" cy="283" r="5" fill="#E3FF8F"/>
+<text x="198.0" y="287.0" font-family="Lausanne, Inter, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="10px" text-anchor="start" fill="#FFFFFF">C2 100%</text>
+<line x1="190" y1="295" x2="220.5" y2="295" stroke="#B27D75" stroke-width="2"/>
+<circle cx="220.5" cy="295" r="5" fill="#B27D75"/>
+<text x="228.5" y="299.0" font-family="Lausanne, Inter, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="10px" text-anchor="start" fill="#FFFFFF">C3 99%</text>
+<line x1="190" y1="307" x2="190.0" y2="307" stroke="#C78EAD" stroke-width="2"/>
+<circle cx="190.0" cy="307" r="5" fill="#C78EAD"/>
+<text x="198.0" y="311.0" font-family="Lausanne, Inter, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="10px" text-anchor="start" fill="#FFFFFF">C4 100%</text>
+<line x1="190" y1="319" x2="190.0" y2="319" stroke="#D5C3F7" stroke-width="2"/>
+<circle cx="190.0" cy="319" r="5" fill="#D5C3F7"/>
+<text x="198.0" y="323.0" font-family="Lausanne, Inter, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="10px" text-anchor="start" fill="#FFFFFF">C5 0%</text>
+<text x="178.0" y="376.0" font-family="Lausanne, Inter, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="12px" text-anchor="end" fill="#FFFFFF">Claude Sonnet 4.6</text>
+<line x1="190" y1="347" x2="190.0" y2="347" stroke="#7FC8FF" stroke-width="2"/>
+<circle cx="190.0" cy="347" r="5" fill="#7FC8FF"/>
+<text x="198.0" y="351.0" font-family="Lausanne, Inter, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="10px" text-anchor="start" fill="#FFFFFF">C1 100%</text>
+<line x1="190" y1="359" x2="190.0" y2="359" stroke="#E3FF8F" stroke-width="2"/>
+<circle cx="190.0" cy="359" r="5" fill="#E3FF8F"/>
+<text x="198.0" y="363.0" font-family="Lausanne, Inter, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="10px" text-anchor="start" fill="#FFFFFF">C2 100%</text>
+<line x1="190" y1="371" x2="190.0" y2="371" stroke="#B27D75" stroke-width="2"/>
+<circle cx="190.0" cy="371" r="5" fill="#B27D75"/>
+<text x="198.0" y="375.0" font-family="Lausanne, Inter, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="10px" text-anchor="start" fill="#FFFFFF">C3 0%</text>
+<line x1="190" y1="383" x2="190.0" y2="383" stroke="#C78EAD" stroke-width="2"/>
+<circle cx="190.0" cy="383" r="5" fill="#C78EAD"/>
+<text x="198.0" y="387.0" font-family="Lausanne, Inter, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="10px" text-anchor="start" fill="#FFFFFF">C4 100%</text>
+<line x1="190" y1="395" x2="190.0" y2="395" stroke="#D5C3F7" stroke-width="2"/>
+<circle cx="190.0" cy="395" r="5" fill="#D5C3F7"/>
+<text x="198.0" y="399.0" font-family="Lausanne, Inter, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="10px" text-anchor="start" fill="#FFFFFF">C5 0%</text>
+<text x="500.0" y="480.0" font-family="Lausanne, Inter, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="11px" text-anchor="middle" fill="#C8DDF0">How to read: read each dot&#x27;s position as variance and its label as pass rate.</text>
+<text x="500.0" y="498.0" font-family="Lausanne, Inter, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="11px" text-anchor="middle" fill="#C8DDF0">What it means: dots near 0 are reliable outcomes; dots near 0.25 are unstable thresholds that need review before automation.</text>
+</svg>

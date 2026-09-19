@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="382" viewBox="0 0 1000 382">
+<rect width="100%" height="100%" fill="#030710"/>
+<text x="500.0" y="32.0" font-family="Lausanne, Inter, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="22px" text-anchor="middle" fill="#FFFFFF">Human-oracle pass/fail accuracy</text>
+<text x="500.0" y="56.0" font-family="Lausanne, Inter, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="14px" text-anchor="middle" fill="#FFFFFF">All repeated judge decisions compared with the fixed human label</text>
+<line x1="270.0" y1="105" x2="270.0" y2="307" stroke="#1A2740" stroke-width="1"/>
+<text x="270.0" y="327.0" font-family="Lausanne, Inter, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="12px" text-anchor="middle" fill="#FFFFFF">0</text>
+<line x1="407.0" y1="105" x2="407.0" y2="307" stroke="#1A2740" stroke-width="1"/>
+<text x="407.0" y="327.0" font-family="Lausanne, Inter, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="12px" text-anchor="middle" fill="#FFFFFF">0.2</text>
+<line x1="544.0" y1="105" x2="544.0" y2="307" stroke="#1A2740" stroke-width="1"/>
+<text x="544.0" y="327.0" font-family="Lausanne, Inter, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="12px" text-anchor="middle" fill="#FFFFFF">0.4</text>
+<line x1="681.0" y1="105" x2="681.0" y2="307" stroke="#1A2740" stroke-width="1"/>
+<text x="681.0" y="327.0" font-family="Lausanne, Inter, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="12px" text-anchor="middle" fill="#FFFFFF">0.6</text>
+<line x1="818.0" y1="105" x2="818.0" y2="307" stroke="#1A2740" stroke-width="1"/>
+<text x="818.0" y="327.0" font-family="Lausanne, Inter, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="12px" text-anchor="middle" fill="#FFFFFF">0.8</text>
+<line x1="955.0" y1="105" x2="955.0" y2="307" stroke="#1A2740" stroke-width="1"/>
+<text x="955.0" y="327.0" font-family="Lausanne, Inter, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="12px" text-anchor="middle" fill="#FFFFFF">1</text>
+<text x="258.0" y="135.0" font-family="Lausanne, Inter, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="12px" text-anchor="end" fill="#FFFFFF">Jev</text>
+<rect x="270" y="118" width="685.0" height="24" fill="#7FC8FF"/>
+<text x="955.0" y="135.0" font-family="Lausanne, Inter, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="12px" text-anchor="end" fill="#FFFFFF">100.0%</text>
+<text x="258.0" y="193.0" font-family="Lausanne, Inter, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="12px" text-anchor="end" fill="#FFFFFF">GPT-5.6 Luna</text>
+<rect x="270" y="176" width="660.3" height="24" fill="#E3FF8F"/>
+<text x="938.3" y="193.0" font-family="Lausanne, Inter, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="12px" text-anchor="end" fill="#FFFFFF">96.4%</text>
+<text x="258.0" y="251.0" font-family="Lausanne, Inter, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="12px" text-anchor="end" fill="#FFFFFF">GPT-5.6 Terra</text>
+<rect x="270" y="234" width="683.6" height="24" fill="#B27D75"/>
+<text x="955.0" y="251.0" font-family="Lausanne, Inter, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="12px" text-anchor="end" fill="#FFFFFF">99.8%</text>
+<text x="258.0" y="309.0" font-family="Lausanne, Inter, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="12px" text-anchor="end" fill="#FFFFFF">Claude Sonnet 4.6</text>
+<rect x="270" y="292" width="548.0" height="24" fill="#C78EAD"/>
+<text x="826.0" y="309.0" font-family="Lausanne, Inter, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="12px" text-anchor="start" fill="#FFFFFF">80.0%</text>
+<text x="500.0" y="348.0" font-family="Lausanne, Inter, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="11px" text-anchor="middle" fill="#C8DDF0">How to read: bar length is the share of all repeated pass/fail judgments that match the oracle.</text>
+<text x="500.0" y="366.0" font-family="Lausanne, Inter, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="11px" text-anchor="middle" fill="#C8DDF0">What it means: longer bars mean the judge more often reaches the human pass/fail decision.</text>
+</svg>

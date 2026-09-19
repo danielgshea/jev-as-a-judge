@@ -9,7 +9,7 @@ from pathlib import Path
 from dotenv import load_dotenv
 from langsmith import Client
 
-from analysis.common import JUDGE_LABELS, NUMERIC_METRICS, project_id, select_repetitions
+from analysis.common import JUDGE_LABELS, NUMERIC_METRICS, project_id, score_oracle, select_repetitions
 from analysis.query_trace_metrics import query_metrics
 
 
@@ -55,6 +55,17 @@ def _axis(parts: list[str], left: float, right: float, top: float, bottom: float
             f'stroke="{BORDER}" stroke-width="1"/>'
         )
         parts.append(_text(left - 10, y + 5, f"{value:.3g}", 12, "end"))
+
+
+def _horizontal_axis(parts: list[str], left: float, right: float, top: float, bottom: float, maximum: float) -> None:
+    for fraction in range(6):
+        value = maximum * fraction / 5
+        x = left + (right - left) * fraction / 5
+        parts.append(
+            f'<line x1="{x:.1f}" y1="{top}" x2="{x:.1f}" y2="{bottom}" '
+            f'stroke="{BORDER}" stroke-width="1"/>'
+        )
+        parts.append(_text(x, bottom + 20, f"{value:.3g}", 12, "middle"))
 
 
 def _metric_value(run, judge: str, metric: str) -> float | None:
@@ -391,15 +402,83 @@ def _does_pass_variance(data: dict) -> str:
     return _svg(width, height, parts)
 
 
+def _does_pass_accuracy(accuracy: dict) -> str:
+    width, height = 1000, 150 + 58 * len(accuracy["judges"])
+    left, right, top, bottom = 270, width - 45, 105, height - 75
+    parts = [
+        _text(width / 2, 32, "Human-oracle pass/fail accuracy", 22, "middle"),
+        _text(width / 2, 56, "All repeated judge decisions compared with the fixed human label", 14, "middle"),
+    ]
+    _horizontal_axis(parts, left, right, top, bottom, 1)
+    for index, (label, result) in enumerate(accuracy["judges"].items()):
+        y = top + 25 + index * 58
+        value = result["does_pass_accuracy"]
+        x = left + (right - left) * value
+        parts.append(_text(left - 12, y + 5, label, 12, "end"))
+        parts.append(f'<rect x="{left}" y="{y - 12}" width="{x - left:.1f}" height="24" fill="{COLORS[index]}"/>')
+        parts.append(_text(min(x + 8, right), y + 5, f"{value:.1%}", 12, "start" if x < right - 45 else "end"))
+    _guide(
+        parts, width, height,
+        "bar length is the share of all repeated pass/fail judgments that match the oracle.",
+        "longer bars mean the judge more often reaches the human pass/fail decision.",
+    )
+    return _svg(width, height, parts)
+
+
+def _quality_agreement(accuracy: dict) -> str:
+    width, height = 1100, 150 + 58 * len(accuracy["judges"])
+    left, middle, right, top, bottom = 260, 610, width - 45, 105, height - 75
+    maximum_mae = max(result["quality_mae"] for result in accuracy["judges"].values())
+    maximum_mae = max(math.ceil(maximum_mae * 10) / 10, 0.1)
+    parts = [
+        _text(width / 2, 32, "Human-oracle quality agreement", 22, "middle"),
+        _text(
+            width / 2,
+            56,
+            f"MAE is lower; agreement is within ±{accuracy['quality_tolerance']:.2f} of the oracle quality score",
+            14,
+            "middle",
+        ),
+    ]
+    _horizontal_axis(parts, left, middle - 35, top, bottom, maximum_mae)
+    _horizontal_axis(parts, middle + 65, right, top, bottom, 1)
+    for index, (label, result) in enumerate(accuracy["judges"].items()):
+        y = top + 25 + index * 58
+        mae_right = left + (middle - 35 - left) * result["quality_mae"] / maximum_mae
+        agreement_left = middle + 65
+        agreement_right = agreement_left + (right - agreement_left) * result["quality_within_tolerance"]
+        parts.append(_text(left - 12, y + 5, label, 12, "end"))
+        parts.append(f'<rect x="{left}" y="{y - 12}" width="{mae_right - left:.1f}" height="24" fill="{COLORS[index]}"/>')
+        parts.append(_text(mae_right + 8, y + 5, f"{result['quality_mae']:.3f}", 12))
+        parts.append(f'<rect x="{agreement_left}" y="{y - 12}" width="{agreement_right - agreement_left:.1f}" height="24" fill="{COLORS[index]}"/>')
+        parts.append(_text(min(agreement_right + 8, right), y + 5, f"{result['quality_within_tolerance']:.1%}", 12))
+    parts.append(_text((left + middle - 35) / 2, 87, "Mean absolute error", 13, "middle"))
+    parts.append(_text((middle + 65 + right) / 2, 87, "Within tolerance", 13, "middle"))
+    _guide(
+        parts, width, height,
+        "compare MAE on the left and the within-tolerance share on the right.",
+        "shorter left bars and longer right bars indicate closer agreement with the human oracle.",
+    )
+    return _svg(width, height, parts)
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description="Generate judge experiment visualizations.")
     parser.add_argument("experiment", help="Experiment name, project UUID, or comparison URL")
     parser.add_argument("--judges", nargs="+", choices=JUDGE_LABELS, help="Only include these judges")
     parser.add_argument("--metrics", nargs="+", choices=NUMERIC_METRICS, help="Only include these feedback metrics")
     parser.add_argument("--output-dir", type=Path, default=Path("assets"), help="Parent directory for experiment assets")
+    parser.add_argument("--cache", type=Path, help="Read a previously generated visualization cache")
     parser.add_argument("--refresh", action="store_true", help="Refresh cached experiment data from LangSmith")
+    parser.add_argument("--benchmark", type=Path, help="Archived benchmark JSON for oracle scoring")
+    parser.add_argument("--oracle-labels", type=Path, help="Human oracle labels JSON")
+    parser.add_argument("--quality-tolerance", type=float, default=0.10)
     args = parser.parse_args()
-    cache_path = _cache_path(Path("assets"), args.experiment, args.judges, args.metrics)
+    if bool(args.benchmark) != bool(args.oracle_labels):
+        parser.error("--benchmark and --oracle-labels must be supplied together.")
+    if args.quality_tolerance < 0:
+        parser.error("--quality-tolerance must be non-negative.")
+    cache_path = args.cache or _cache_path(Path("assets"), args.experiment, args.judges, args.metrics)
     if cache_path.exists() and not args.refresh:
         data, repetitions, experiment_id, trace_metrics = _read_cache(cache_path)
     else:
@@ -409,6 +488,22 @@ def main() -> None:
         _write_cache(cache_path, data, repetitions, experiment_id, trace_metrics)
     output_dir = _asset_dir(args.output_dir, experiment_id)
     output_dir.mkdir(parents=True, exist_ok=True)
+    accuracy = None
+    if args.benchmark:
+        benchmark = json.loads(args.benchmark.read_text(encoding="utf-8"))
+        if benchmark["experiment_id"] != experiment_id:
+            parser.error("Benchmark and experiment IDs do not match.")
+        oracle = json.loads(args.oracle_labels.read_text(encoding="utf-8"))
+        accuracy = score_oracle(
+            data,
+            benchmark["frozen_cases"],
+            oracle,
+            args.quality_tolerance,
+        )
+        accuracy["experiment_id"] = experiment_id
+        accuracy_output = output_dir / "accuracy.json"
+        accuracy_output.write_text(json.dumps(accuracy, indent=2) + "\n", encoding="utf-8")
+        print(accuracy_output)
     if _continuous_metrics(data):
         outputs = {"variance-ratios.svg": _relative_variance(data)}
     else:
@@ -421,6 +516,9 @@ def main() -> None:
     if "does_pass" in data["metrics"]:
         outputs["does-pass-oscillation.svg"] = _metric_oscillation(data, repetitions, "does_pass")
         outputs["does-pass-variance.svg"] = _does_pass_variance(data)
+    if accuracy:
+        outputs["does-pass-accuracy.svg"] = _does_pass_accuracy(accuracy)
+        outputs["quality-agreement.svg"] = _quality_agreement(accuracy)
     for name, contents in outputs.items():
         output = output_dir / name
         output.write_text(contents, encoding="utf-8")

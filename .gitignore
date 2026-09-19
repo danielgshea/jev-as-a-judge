@@ -3,6 +3,7 @@
 !.env.example
 
 .venv/
+node_modules/
 __pycache__/
 *.py[cod]
 
@@ -20,6 +21,7 @@ assets/.cache/
 *.crt
 *.p12
 *.pfx
+*.jks
 credentials.json
 token.json
 Cookies*

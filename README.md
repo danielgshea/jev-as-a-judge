@@ -1,53 +1,58 @@
 # Jev as a Judge
 
-This project evaluates a DeepAgents weather agent that uses Tavily to find current conditions and forecasts. The evaluator compares [Jev](https://docs.typesafe.ai/introduction), TypeSafe's flagship System One model, with three autoregressive LLM judges: GPT-5.6 Luna, GPT-5.6 Terra, and Claude Sonnet 4.6. It measures repeatability through score variance; it does not measure alignment with human reviewers.
+This project evaluates a DeepAgents weather agent that uses Tavily to find current conditions and forecasts. Its offline judge experiment compares [Jev](https://docs.typesafe.ai/introduction), TypeSafe's System One model, with GPT-5.6 Luna, GPT-5.6 Terra, and Claude Sonnet 4.6.
 
-## Latest judge reliability result
+## Offline judge experiment
 
-The `benchmark-jev-luna-terra-sonnet` experiment replays five fixed weather-agent outputs 100 times for each evaluator. The answer, evidence, tool calls, and expected behavior are fixed, so observed variation comes from the evaluators rather than the weather agent. Expected behavior is a case-specific, human-defined description of a good response—not objective ground truth.
+The `benchmark-jev-luna-terra-sonnet` offline judge experiment replays five fixed weather-agent outputs 100 times for each judge. The final answer, evidence, tool calls, and expected behavior are frozen, so differences across repetitions come from the judges rather than the weather agent.
 
-### Continuous and binary scores
+Each judge returns an aggregate `quality` score and a binary `does_pass` score. Quality is the mean of groundedness, expected search behavior, and usefulness. A single human reviewer labeled those same three fields plus pass/fail for each frozen response; the labels are in [oracle-labels.json](./assets/benchmark-jev-luna-terra-sonnet/6d08df72-c878-458c-b7c5-a7824ee6e721/oracle-labels.json).
 
-Each judge returned two signals: an aggregate `quality` score and a binary `does_pass` score. Quality is the mean of three evaluator-returned 0–1 dimensions: groundedness, expected search behavior, and usefulness. `does_pass` is either `0` or `1`.
+### Accuracy against the human oracle
 
-### Float quality score
+Pass/fail accuracy compares all 500 repeated decisions per judge with the fixed human label. Quality is continuous, so the experiment reports mean absolute error (MAE; lower is better) and the share of scores within ±0.10 of the human quality score.
 
-A lower variance score means the scores the judges returned are more consistent. Jev's mean per-case sample variance was `0.0000149`; the LLM judges were `92×` to `913×` higher in this benchmark.
+| Judge | Pass/fail accuracy | Quality MAE | Quality within ±0.10 |
+| --- | ---: | ---: | ---: |
+| Jev | 100.0% | 0.106 | 60.0% |
+| GPT-5.6 Luna | 96.4% | 0.087 | 65.0% |
+| GPT-5.6 Terra | 99.8% | 0.077 | 68.6% |
+| Claude Sonnet 4.6 | 80.0% | 0.078 | 76.4% |
 
-| Evaluator | Mean quality variance | Relative to Jev |
+On this small, single-reviewer corpus, Jev matched every human pass/fail label; GPT-5.6 Terra had the lowest quality MAE. These results are descriptive, not a general accuracy claim.
+
+Accuracy and precision answer different questions: accuracy measures agreement with the human oracle, while precision measures whether the judge reaches that judgment consistently. A judge can look accurate on average yet still be unreliable for an individual decision if it changes its verdict on identical inputs.
+
+![Human-oracle pass/fail accuracy](./assets/benchmark-jev-luna-terra-sonnet-oracle/6d08df72-c878-458c-b7c5-a7824ee6e721/does-pass-accuracy.svg)
+
+![Human-oracle quality agreement](./assets/benchmark-jev-luna-terra-sonnet-oracle/6d08df72-c878-458c-b7c5-a7824ee6e721/quality-agreement.svg)
+
+### Repeatability
+
+A lower variance means a judge returns more consistent scores for the same frozen case. That consistency makes observed accuracy more dependable over repeated production decisions, especially near a pass/fail threshold where score noise can flip a verdict. Variance alone is not accuracy, however: a judge can be consistently wrong. Jev's mean per-case quality variance was `0.0000149`; the LLM judges were `92×` to `913×` higher in this offline judge experiment.
+
+| Judge | Mean quality variance | Relative to Jev |
 | --- | ---: | ---: |
 | Jev | 0.0000149 | 1× |
 | GPT-5.6 Luna | 0.00647 | 433× |
 | GPT-5.6 Terra | 0.01364 | 913× |
 | Claude Sonnet 4.6 | 0.00137 | 92× |
 
-![Relative variance of repeated quality scores](./assets/benchmark-jev-luna-terra-sonnet/6d08df72-c878-458c-b7c5-a7824ee6e721/variance-ratios.svg)
+![Relative variance of repeated quality scores](./assets/benchmark-jev-luna-terra-sonnet-oracle/6d08df72-c878-458c-b7c5-a7824ee6e721/variance-ratios.svg)
 
-![Quality-score distribution across repetitions](./assets/benchmark-jev-luna-terra-sonnet/6d08df72-c878-458c-b7c5-a7824ee6e721/quality-by-repetition.svg)
+![Quality-score distribution across repetitions](./assets/benchmark-jev-luna-terra-sonnet-oracle/6d08df72-c878-458c-b7c5-a7824ee6e721/quality-by-repetition.svg)
 
-![Quality-score oscillation across repetitions](./assets/benchmark-jev-luna-terra-sonnet/6d08df72-c878-458c-b7c5-a7824ee6e721/quality-oscillation.svg)
+![Quality-score oscillation across repetitions](./assets/benchmark-jev-luna-terra-sonnet-oracle/6d08df72-c878-458c-b7c5-a7824ee6e721/quality-oscillation.svg)
 
-### Binary pass/fail score
+For `does_pass`, the observed Bernoulli variance is `p(1-p)`: zero means every repetition gave the same verdict, while `0.25` is a 50/50 split. Those flips become false passes or false failures whenever the changed verdict disagrees with the human label. Jev and Claude were stable on every case. GPT-5.6 Terra changed on one case (`99%` pass); GPT-5.6 Luna changed on two (`91%` and `9%` pass).
 
-For `does_pass` (a binary score), the chart uses the observed Bernoulli variance `p(1-p)`, where `p` is the pass rate. It is `0` when every repetition gives the same verdict and reaches `0.25` at a 50/50 split. The script's summary reports the corresponding unbiased sample variance.
+![Binary pass/fail variance by frozen case](./assets/benchmark-jev-luna-terra-sonnet-oracle/6d08df72-c878-458c-b7c5-a7824ee6e721/does-pass-variance.svg)
 
-Jev and Claude returned the same binary verdict on every case. GPT-5.6 Terra changed only on case 3 (`99%` pass; variance `0.0099`). GPT-5.6 Luna changed on cases 3 and 5 (`91%` and `9%` pass; variance `0.0819` each).
+![Binary pass/fail oscillation across repetitions](./assets/benchmark-jev-luna-terra-sonnet-oracle/6d08df72-c878-458c-b7c5-a7824ee6e721/does-pass-oscillation.svg)
 
-![Binary pass/fail variance by fixed case](./assets/benchmark-jev-luna-terra-sonnet/6d08df72-c878-458c-b7c5-a7824ee6e721/does-pass-variance.svg)
+![Judge cost and latency](./assets/benchmark-jev-luna-terra-sonnet-oracle/6d08df72-c878-458c-b7c5-a7824ee6e721/cost-and-latency.svg)
 
-![Binary pass/fail oscillation across repetitions](./assets/benchmark-jev-luna-terra-sonnet/6d08df72-c878-458c-b7c5-a7824ee6e721/does-pass-oscillation.svg)
-
-### What this means for Jev
-
-The float and binary results answer different questions. Float quality scores retain small shifts in evaluator confidence or rating, making model-to-model drift visible: GPT-5.6 Terra had the largest float variance, followed by GPT-5.6 Luna and Claude. Binary scores threshold those shifts into pass/fail decisions, so they can have lower observed variance even when the underlying float judgment moves. That is why GPT-5.6 Terra is highly variable on quality while showing low observed variance on `does_pass`.
-
-In this controlled benchmark, **Jev has the lowest observed variance on the continuous quality metric and zero observed binary variance.** That makes it a candidate for workflows that need stable, typed signals for ranking, thresholding, or automation.
-
-Repeatability is not correctness. Before automating decisions with any judge, send representative runs to a LangSmith annotation queue, collect human labels or scores, and compare them with the judge's output. Use the gaps to refine the evaluator's rubric, prompt, and examples. [LangSmith's process for improving judge evaluator feedback](https://docs.langchain.com/langsmith/improve-judge-evaluator-feedback) walks through that workflow. This benchmark contains five cases and measures repeatability, not agreement with human labels.
-
-![Evaluator cost and latency](./assets/benchmark-jev-luna-terra-sonnet/6d08df72-c878-458c-b7c5-a7824ee6e721/cost-and-latency.svg)
-
-Run the benchmark again with:
+### Reproduce the offline judge experiment
 
 ```bash
 uv run python src/evals/judge_reliability.py
@@ -55,13 +60,7 @@ uv run python src/evals/judge_reliability.py
 
 The script reports means, standard deviations, bootstrap 95% confidence intervals, variance differences, and variance ratios. Use `--local` to run without uploading an experiment.
 
-### Cost
-
-The benchmark's evaluator calls cost approximately `$0.34` for Jev, `$0.39` for GPT-5.6 Luna, `$2.90` for GPT-5.6 Terra, and `$28.17` for Claude Sonnet 4.6. Cost and latency are shown above; they depend on the prompts, inputs, and provider pricing at the time of the run.
-
-### Reproducibility
-
-The published benchmark is `benchmark-jev-luna-terra-sonnet` (`6d08df72-c878-458c-b7c5-a7824ee6e721`), started at `2026-09-18T17:53:25Z`. Its [archived frozen cases and analysis](./assets/benchmark-jev-luna-terra-sonnet/6d08df72-c878-458c-b7c5-a7824ee6e721/benchmark.json) reproduce the reported quality variances. LLM judges used LangSmith Gateway with `openai/gpt-5.6-luna`, `openai/gpt-5.6-terra`, and `anthropic/claude-sonnet-4-6`; Jev was accessed through `langchain-typesafe==0.0.1a2`. The run used `deepagents==0.7.15`, `langchain-openai==1.6.2`, `langsmith==0.12.6`, and `tavily-python==0.8.3`. No temperature, top-p, seed, or max-token setting was supplied for the LLM judges, so provider and gateway defaults applied. The hosted Jev service version was not exposed by the experiment metadata. The metadata also lists Gemini Flash; it is not included in this report's figures or analysis.
+The published offline judge experiment is `benchmark-jev-luna-terra-sonnet` (`6d08df72-c878-458c-b7c5-a7824ee6e721`), started at `2026-09-18T17:53:25Z`. Its [archived frozen cases and analysis](./assets/benchmark-jev-luna-terra-sonnet/6d08df72-c878-458c-b7c5-a7824ee6e721/benchmark.json) reproduce the variance analysis; its [accuracy report](./assets/benchmark-jev-luna-terra-sonnet-oracle/6d08df72-c878-458c-b7c5-a7824ee6e721/accuracy.json) reproduces the human-oracle results. LLM judges used LangSmith Gateway with `openai/gpt-5.6-luna`, `openai/gpt-5.6-terra`, and `anthropic/claude-sonnet-4-6`; Jev was accessed through `langchain-typesafe==0.0.1a2`. The run used `deepagents==0.7.15`, `langchain-openai==1.6.2`, `langsmith==0.12.6`, and `tavily-python==0.8.3`. No temperature, top-p, seed, or max-token setting was supplied for the LLM judges, so provider and gateway defaults applied. The hosted Jev service version was not exposed by the experiment metadata. The metadata also lists Gemini Flash; it is not included in this report's figures or analysis.
 
 ## Why Jev for evals?
 
