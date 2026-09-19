@@ -1,35 +1,74 @@
-# Jev as a Judge
+# Jev as a judge for agent evals
 
-This project evaluates a DeepAgents weather agent that uses Tavily to find current conditions and forecasts. Its offline judge experiment compares [Jev](https://docs.typesafe.ai/introduction), TypeSafe's System One model, with GPT-5.6 Luna, GPT-5.6 Terra, and Claude Sonnet 4.6.
+Agent evaluators usually fall into two categories: deterministic code and LLM-as-a-judge. Code is fast and reliable but limited to behavior that can be expressed as explicit logic. LLM judges can evaluate open-ended agent behavior, but they add cost, latency, and variance.
 
-## Offline judge experiment
+This project tests a third option: [Jev](https://docs.typesafe.ai/introduction), TypeSafe AI's System One decision model. We compare Jev with GPT-5.6 Luna, GPT-5.6 Terra, and Claude Sonnet 4.6 on the same fixed agent runs, measuring binary accuracy, score reliability, cost, and latency.
 
-The `benchmark-jev-luna-terra-sonnet` offline judge experiment replays five fixed weather-agent outputs 100 times for each judge. The final answer, evidence, tool calls, and expected behavior are frozen, so differences across repetitions come from the judges rather than the weather agent.
+## What is Jev?
 
-Each judge returns an aggregate `quality` score and a binary `does_pass` score. Quality is the mean of groundedness, expected search behavior, and usefulness. A single human reviewer labeled those same three fields plus pass/fail for each frozen response; the labels are in [oracle-labels.json](./assets/benchmark-jev-luna-terra-sonnet/6d08df72-c878-458c-b7c5-a7824ee6e721/oracle-labels.json).
+Jev is not an autoregressive LLM and does not generate text. It evaluates typed questions against structured state and returns typed answers with probabilities.
+
+Jev supports three question types:
+
+| Type | What it returns | Example evaluator question |
+| --- | --- | --- |
+| `Noul` | Probability that a yes-or-no judgment is true | Is the final answer grounded in the retrieved evidence? |
+| `Score` | An ordered rubric score, probabilities, and confidence | How useful is the answer? |
+| `Choice` | One option, probabilities, and confidence | Did the agent search appropriately? |
+
+Multiple atomic questions can be evaluated in parallel against the same state.
+
+## Why use a decision model as a judge?
+
+Agent evaluation is a decision task: given an agent's state and behavior, assign a score that provides feedback. Jev is designed for this pattern. It evaluates typed questions against structured state and returns typed answers with probabilities. Autoregressive models, on the other hand, reach a judgment through token-by-token generation. In our experiment, that decision-first design coincided with lower latency, lower cost, and lower variance.
+
+That does not make any judge correct by default. A repeatable evaluator can still be consistently wrong, so we compare each judge with human labels and keep accuracy separate from reliability.
+
+## Experiment
+
+We built a weather agent with [Deep Agents](https://www.langchain.com/deep-agents) and gave it access to Tavily web search. We defined five cases in a LangSmith dataset:
+
+| Request type | Location | User need |
+| --- | --- | --- |
+| Current conditions | Seattle | Report the weather right now |
+| Weekend forecast | Austin | Describe the expected weekend weather |
+| Decision support | Dublin | Decide whether to bring an umbrella |
+| Longer-range forecast | Tokyo | Report the extended forecast |
+| Ambiguous location | Springfield | Handle a request without a unique place |
+
+We ran the weather agent once for each case and stored its complete output, including the final answer, evidence, tool calls, and expected behavior. Freezing the agent runs meant that only the judges could introduce variation between repetitions.
+
+Each judge evaluated the five captured runs 100 times with two signals:
+
+| Evaluator | What it measures | Output |
+| --- | --- | --- |
+| `quality` | Grounding, search behavior, and usefulness | Continuous score from `0` to `1` |
+| `does_pass` | Overall success | Binary decision: `0` or `1` |
+
+A human reviewer labeled each fixed response against the same rubric. We use those labels as the oracle for binary accuracy. We use the continuous `quality` score only to measure reliability through variance, not accuracy.
+
+## Results
 
 ### Accuracy
 
-Pass/fail accuracy compares all 500 repeated decisions per judge with the fixed human label. Quality is continuous, so the experiment reports mean absolute error (MAE; lower is better) and the share of scores within ±0.10 of the human quality score.
+Accuracy measures whether a judge's binary `does_pass` decision agrees with the human oracle. Across 500 repeated decisions per judge, Jev matched every human pass-or-fail label.
 
-| Judge | Pass/fail accuracy | Quality MAE | Quality within ±0.10 |
-| --- | ---: | ---: | ---: |
-| Jev | 100.0% | 0.106 | 60.0% |
-| GPT-5.6 Luna | 96.4% | 0.087 | 65.0% |
-| GPT-5.6 Terra | 99.8% | 0.077 | 68.6% |
-| Claude Sonnet 4.6 | 80.0% | 0.078 | 76.4% |
+| Judge | Pass-or-fail accuracy |
+| --- | ---: |
+| Jev | 100.0% |
+| GPT-5.6 Terra | 99.8% |
+| GPT-5.6 Luna | 96.4% |
+| Claude Sonnet 4.6 | 80.0% |
 
-On this small, single-reviewer corpus, Jev matched every human pass/fail label; GPT-5.6 Terra had the lowest quality MAE. These results are descriptive, not a general accuracy claim.
+![Human-oracle pass-or-fail accuracy](./assets/benchmark-jev-luna-terra-sonnet-oracle/6d08df72-c878-458c-b7c5-a7824ee6e721/does-pass-accuracy.svg)
 
-Accuracy and precision answer different questions: accuracy measures agreement with the human oracle, while precision measures whether the judge reaches that judgment consistently. A judge can look accurate on average yet still be unreliable for an individual decision if it changes its verdict on identical inputs.
-
-![Human-oracle pass/fail accuracy](./assets/benchmark-jev-luna-terra-sonnet-oracle/6d08df72-c878-458c-b7c5-a7824ee6e721/does-pass-accuracy.svg)
-
-![Human-oracle quality agreement](./assets/benchmark-jev-luna-terra-sonnet-oracle/6d08df72-c878-458c-b7c5-a7824ee6e721/quality-agreement.svg)
+This is a small corpus with five agent runs and one human reviewer. The result describes this experiment; it is not a general ranking of judge accuracy.
 
 ### Reliability
 
-A lower variance means a judge returns more consistent scores for the same frozen case. That consistency makes observed accuracy more dependable over repeated production decisions, especially near a pass/fail threshold where score noise can flip a verdict. Variance alone is not accuracy, however: a judge can be consistently wrong. Jev's mean per-case quality variance was `0.0000149`; the LLM judges were `92×` to `913×` higher in this offline judge experiment.
+Reliability asks whether a judge produces the same score when the agent behavior is unchanged. We measured it using the observed variance of each judge's continuous `quality` scores. Lower variance is better.
+
+Jev had the lowest observed mean per-case variance: `0.0000149`. Luna was `433×` higher, Terra was `913×` higher, and Claude was `92×` higher.
 
 | Judge | Mean quality variance | Relative to Jev |
 | --- | ---: | ---: |
@@ -42,13 +81,7 @@ A lower variance means a judge returns more consistent scores for the same froze
 
 ![Quality-score distribution across repetitions](./assets/benchmark-jev-luna-terra-sonnet-oracle/6d08df72-c878-458c-b7c5-a7824ee6e721/quality-by-repetition.svg)
 
-![Quality-score oscillation across repetitions](./assets/benchmark-jev-luna-terra-sonnet-oracle/6d08df72-c878-458c-b7c5-a7824ee6e721/quality-oscillation.svg)
-
-For `does_pass`, the observed Bernoulli variance is `p(1-p)`: zero means every repetition gave the same verdict, while `0.25` is a 50/50 split. Those flips become false passes or false failures whenever the changed verdict disagrees with the human label. Jev and Claude were stable on every case. GPT-5.6 Terra changed on one case (`99%` pass); GPT-5.6 Luna changed on two (`91%` and `9%` pass).
-
-![Binary pass/fail variance by frozen case](./assets/benchmark-jev-luna-terra-sonnet-oracle/6d08df72-c878-458c-b7c5-a7824ee6e721/does-pass-variance.svg)
-
-![Binary pass/fail oscillation across repetitions](./assets/benchmark-jev-luna-terra-sonnet-oracle/6d08df72-c878-458c-b7c5-a7824ee6e721/does-pass-oscillation.svg)
+This experiment cannot establish why Jev varied less. One hypothesis is that a model designed to return bounded decisions is a better fit for this task than a model designed for autoregressive generation. The result is observational, not evidence that the model architecture caused the lower variance.
 
 ### Cost
 
@@ -59,50 +92,17 @@ For `does_pass`, the observed Bernoulli variance is `p(1-p)`: zero means every r
 | GPT-5.6 Terra | $0.00289 | 2.83 s | $2.90 |
 | Claude Sonnet 4.6 | $0.02811 | 2.16 s | $28.17 |
 
-At $0.00035 per call in this experiment, Jev made repeated judgments and frequent regression checks inexpensive. These costs depend on the prompts, inputs, and provider pricing at the time of the run.
+At $0.00035 per call, Jev makes repeated judgments and frequent regression checks inexpensive. These costs depend on the prompts, inputs, and provider pricing at the time of the run.
 
 ![Judge cost and latency](./assets/benchmark-jev-luna-terra-sonnet-oracle/6d08df72-c878-458c-b7c5-a7824ee6e721/cost-and-latency.svg)
 
-### Reproduce the offline judge experiment
+## What abundant evaluation changes
 
-```bash
-uv run python src/evals/judge_reliability.py
-```
+The important result is not simply a lower evaluation bill. When high-quality judgment becomes cheap enough to use broadly, builders can evaluate more agent runs, test more dimensions, and measure more changes without narrowing the feedback loop around cost.
 
-The script reports means, standard deviations, bootstrap 95% confidence intervals, variance differences, and variance ratios. Use `--local` to run without uploading an experiment.
+That can speed up the entire agent development lifecycle. Agent engineers can turn more traces into feedback, catch regressions sooner, and move faster as they build, test, monitor, and deploy agents. Low cost can also amplify mistakes, so human review, representative datasets, and judge alignment still matter.
 
-The published offline judge experiment is `benchmark-jev-luna-terra-sonnet` (`6d08df72-c878-458c-b7c5-a7824ee6e721`), started at `2026-09-18T17:53:25Z`. Its [archived frozen cases and analysis](./assets/benchmark-jev-luna-terra-sonnet/6d08df72-c878-458c-b7c5-a7824ee6e721/benchmark.json) reproduce the variance analysis; its [accuracy report](./assets/benchmark-jev-luna-terra-sonnet-oracle/6d08df72-c878-458c-b7c5-a7824ee6e721/accuracy.json) reproduces the human-oracle results. LLM judges used LangSmith Gateway with `openai/gpt-5.6-luna`, `openai/gpt-5.6-terra`, and `anthropic/claude-sonnet-4-6`; Jev was accessed through `langchain-typesafe==0.0.1a2`. The run used `deepagents==0.7.15`, `langchain-openai==1.6.2`, `langsmith==0.12.6`, and `tavily-python==0.8.3`. No temperature, top-p, seed, or max-token setting was supplied for the LLM judges, so provider and gateway defaults applied. The hosted Jev service version was not exposed by the experiment metadata. The metadata also lists Gemini Flash; it is not included in this report's figures or analysis.
-
-## Why Jev for evals?
-
-Autoregressive LLM judges can take a question, trace, and evidence as unstructured input, then use a prompt to evaluate whether the response addressed the user's request. Jev is designed to make structured decisions directly: it evaluates typed questions against structured state and returns typed answers without an explanation-parsing step.
-
-That makes Jev a natural fit for evaluator logic:
-
-- `Noul` returns the probability that a yes/no judgment is true.
-  - E.g.: “Is the final answer grounded in the retrieved evidence?”
-  - Response: A `float` from `0.0` to `1.0`, where `1.0` means fully grounded
-- `Choice` selects one option and returns probabilities and confidence.
-  - E.g.: “Which search outcome best describes this run?”
-  - Response: One of `searched_appropriately`, `searched_unnecessarily`, or `failed_to_search`, plus probabilities and confidence
-- Multiple atomic questions can be evaluated in parallel against the same state.
-
-This project sends every judge the weather question, the agent's final answer, Tavily evidence, tool calls, and expected behavior. Each judge runs three interactions: quality checks groundedness, search behavior, and usefulness; does_pass returns a pass/fail result; and choice classifies the outcome as answered, clarification-needed, or poor. The resulting metrics are stored under model-specific LangSmith keys.
-
-The point is not that one judge is universally better. Jev gives this evaluator typed, composable signals that are easy to combine, threshold, and inspect.
-
-## Return types and evaluation strategies
-
-Choose the TypeSafe primitive based on the shape of the decision you need to make:
-
-| Return type | What it returns | Evaluation strategy | This project |
-| --- | --- | --- | --- |
-| `Noul` | A `0`–`1` probability that a yes/no statement is true | Threshold it for pass/fail checks, or combine several probabilities into one quality metric | `jev_weather_quality` checks groundedness, search behavior, and usefulness |
-| `Choice` | One category, plus probabilities and confidence | Segment outcomes, identify failure modes, or route examples for review | `jev_weather_choice` classifies answers as answered, clarification-needed, or poor |
-
-In practice, use `Noul` for focused invariants and `Choice` when the next action depends on a discrete outcome. Choice exposes confidence, which can identify borderline examples for manual review; Noul is best treated as a probability for a binary decision.
-
-## Quick start
+## Run the project
 
 Requires Python 3.13+, a Tavily API key, a TypeSafe API key, and a workspace-scoped LangSmith API key with Gateway access.
 
@@ -112,92 +112,66 @@ cp .env.example .env
 uv sync
 ```
 
-Optionally create the LangSmith dataset ahead of time:
-
-```bash
-uv run python src/evals/dataset.py
-```
-
-Run the local weather-agent evaluation. This uses the examples in `src/evals/dataset.py`, pretty-prints every judge result, and does not require the dataset to exist in LangSmith:
+Run the local evaluation without uploading an experiment:
 
 ```bash
 uv run python main.py
 ```
 
-To upload the dataset and record an evaluation experiment in LangSmith, run:
+Upload the dataset and record an evaluation experiment in LangSmith:
 
 ```bash
 uv run python src/evals/offline_evals.py
 ```
 
-The evaluation runner creates the `weather-agent` dataset if it is missing and reuses it on later runs. Run `src/evals/dataset.py` separately only when you want to create or inspect the dataset without running an experiment.
-
-Run only the sample weather agent directly:
+Reproduce the repeated-judge benchmark:
 
 ```bash
-uv run python -m weather_agent.main
+uv run python src/evals/judge_reliability.py
 ```
 
-## Configuration
+Use `--local` with the benchmark command to run without uploading an experiment.
 
-The main settings are in `.env`:
+### Configuration
 
 | Variable | Purpose |
 | --- | --- |
-| `TAVILY_API_KEY` | Web search used by `search_weather` |
+| `TAVILY_API_KEY` | Web search used by the weather agent |
 | `TYPESAFE_API_KEY` | Jev evaluator access |
-| `LANGSMITH_API_KEY` | LangSmith tracing, datasets, and evaluation access |
-| `LS_LLM_GATEWAY_KEY` | LLM Gateway model invocation |
-| `LANGSMITH_GATEWAY` | Routes the weather agent through LangSmith Gateway; set to `true` |
-| `LANGSMITH_TRACING` | Enables LangSmith traces; set to `true` |
+| `LANGSMITH_API_KEY` | LangSmith tracing, datasets, evaluation, and Gateway access |
+| `LS_LLM_GATEWAY_KEY` | LangSmith Gateway model invocation |
+| `LANGSMITH_GATEWAY` | Routes the weather agent through LangSmith Gateway when `true` |
+| `LANGSMITH_TRACING` | Enables LangSmith traces when `true` |
 | `LANGSMITH_PROJECT` | LangSmith project for traces |
-| `WEATHER_AGENT_MODEL` | Model string, defaulting to `openai:gpt-5.5` |
+| `WEATHER_AGENT_MODEL` | Weather-agent model identifier |
 
-The judge labels and gateway model identifiers are:
+## Reproducibility
 
-| Label | Model identifier | Credential |
-| --- | --- | --- |
-| GPT-5.6 Luna | `openai/gpt-5.6-luna` | `LANGSMITH_API_KEY` |
-| GPT-5.6 Terra | `openai/gpt-5.6-terra` | `LANGSMITH_API_KEY` |
-| Claude Sonnet 4.6 | `anthropic/claude-sonnet-4-6` | `LS_LLM_GATEWAY_KEY` |
+The published LangSmith experiment is `benchmark-jev-luna-terra-sonnet` (`6d08df72-c878-458c-b7c5-a7824ee6e721`), started at `2026-09-18T17:53:25Z`.
 
-## How the evaluation is wired
+- [Frozen cases and variance analysis](./assets/benchmark-jev-luna-terra-sonnet/6d08df72-c878-458c-b7c5-a7824ee6e721/benchmark.json)
+- [Human oracle labels](./assets/benchmark-jev-luna-terra-sonnet/6d08df72-c878-458c-b7c5-a7824ee6e721/oracle-labels.json)
+- [Generated result assets](./assets/benchmark-jev-luna-terra-sonnet-oracle/6d08df72-c878-458c-b7c5-a7824ee6e721/)
 
-```text
-weather question
-      |
-      v
-DeepAgent -- search_weather --> Tavily evidence
-      |
-      v
-final answer + evidence + tool calls + expectations
-      |
-      v
-Jev + three LLM judges: quality + does_pass + choice
-      |
-      v
-LangSmith score and trace
-```
+The LLM judges ran through LangSmith Gateway with `openai/gpt-5.6-luna`, `openai/gpt-5.6-terra`, and `anthropic/claude-sonnet-4-6`. Jev ran through `langchain-typesafe==0.0.1a2`. The experiment used `deepagents==0.7.15`, `langchain-openai==1.6.2`, `langsmith==0.12.6`, and `tavily-python==0.8.3`.
 
-Each judge interaction is wrapped with LangSmith's `@traceable` decorator, so model-specific quality, pass/fail, and outcome traces appear when tracing is enabled.
+We did not set temperature, top-p, seed, or max tokens for the LLM judges, so provider and gateway defaults applied. The experiment metadata did not expose the hosted Jev service version.
 
 ## Project layout
 
-- `src/weather_agent/agent.py` — DeepAgents weather agent and Tavily tool.
-- `src/evals/dataset.py` — Creates the `weather-agent` LangSmith dataset.
-- `src/evals/judges/` — Jev and LLM evaluators.
-- `analysis/` — Dynamic experiment visualizations and trace-metric queries.
-- `src/evals/offline_evals.py` — Runs the agent over the dataset and uploads results.
-- `langgraph.json` — Registers the weather agent for LangGraph tooling.
+- `src/weather_agent/` — Deep Agents weather agent and Tavily tool
+- `src/evals/dataset.py` — LangSmith dataset definition
+- `src/evals/judges/` — Jev and LLM evaluators
+- `src/evals/offline_evals.py` — Dataset evaluation runner
+- `src/evals/judge_reliability.py` — Repeated-judge benchmark
+- `analysis/` — Accuracy, variance, cost, and latency analysis
+- `assets/` — Archived benchmark data and generated charts
+- `tests/` — Focused analysis tests
 
-## Official documentation
+## References
 
 - [TypeSafe introduction](https://docs.typesafe.ai/introduction)
-- [TypeSafe Python quick start](https://docs.typesafe.ai/introduction/quickstart)
 - [TypeSafe primitives](https://docs.typesafe.ai/primitives)
-- [Noul](https://docs.typesafe.ai/primitives/noul)
-- [Confidence](https://docs.typesafe.ai/confidence)
-- [TypeSafe API reference](https://docs.typesafe.ai/api)
 - [LangSmith evaluation quickstart](https://docs.langchain.com/langsmith/evaluation-quickstart)
-- [LangSmith `@traceable`](https://docs.langchain.com/langsmith/annotate-code)
-- [DeepAgents quickstart](https://docs.langchain.com/oss/python/deepagents/quickstart)
+- [LangSmith LLM-as-a-judge](https://docs.langchain.com/langsmith/llm-as-judge)
+- [Deep Agents quickstart](https://docs.langchain.com/oss/python/deepagents/quickstart)
