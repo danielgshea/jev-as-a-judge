@@ -9,8 +9,8 @@ from pathlib import Path
 from dotenv import load_dotenv
 from langsmith import Client
 
-from analysis.common import JUDGE_LABELS, NUMERIC_METRICS, project_id, score_oracle, select_repetitions
-from analysis.query_trace_metrics import query_metrics
+from evals.analysis.common import JUDGE_LABELS, NUMERIC_METRICS, project_id, score_oracle, select_repetitions
+from evals.analysis.traces import query_metrics
 
 
 BACKGROUND = "#030710"
@@ -247,9 +247,9 @@ def _metric_oscillation(data: dict, repetitions: int, metric: str) -> str:
         else f"Judge {metric_label} oscillation across {repetitions} repetitions"
     )
     subtitle = (
-        "Mean evaluator-returned quality score across five frozen cases; shared zoomed y-axis"
+        "Mean evaluator-returned quality score across five recorded cases; shared zoomed y-axis"
         if metric == "quality"
-        else f"Mean {metric_label} across five frozen cases; shared zoomed y-axis"
+        else f"Mean {metric_label} across five recorded cases; shared zoomed y-axis"
     )
     parts = [
         _text(width / 2, 32, title, 22, "middle"),
@@ -277,59 +277,76 @@ def _metric_oscillation(data: dict, repetitions: int, metric: str) -> str:
                 parts.append(_text(x, bottom + 22, str(index + 1), 12, "middle"))
     _guide(
         parts, width, height,
-        "each point is the mean across frozen cases for one repetition; panels share one zoomed scale.",
+        "each point is the mean across recorded cases for one repetition; panels share one zoomed scale.",
         "a flat line is repeatable; frequent swings are noisy; isolated spikes or dips are one-off judgement changes.",
     )
     return _svg(width, height, parts)
 
 
-def _cost_and_latency(metrics: dict) -> str:
+def _latency_comparison(metrics: dict) -> str:
     values = [
-        (label, metrics["judges"][label])
+        (label, metrics["judges"][label]["average_latency_seconds"])
         for _, label in JUDGE_LABELS.items()
         if label in metrics["judges"]
-        and metrics["judges"][label]["average_cost"] is not None
         and metrics["judges"][label]["average_latency_seconds"] is not None
     ]
-    costs = [item["average_cost"] for _, item in values]
-    latencies = [item["average_latency_seconds"] for _, item in values]
-    log_min, log_max = math.log10(min(costs)), math.log10(max(costs))
-    if log_min == log_max:
-        log_min -= 0.5
-        log_max += 0.5
-    maximum_latency = max(latencies) * 1.1
-    width, height = 1050, 625
-    left, right, top, bottom = 125, width - 45, 95, 450
+    maximum = max(latency for _, latency in values) * 1.2
+    width, height = 900, 360
+    left, right, top, bottom = 160, width - 55, 90, 240
     parts = [
-        _text(width / 2, 32, "Judge cost and latency", 22, "middle"),
-        _text(width / 2, 56, "Cost per evaluator call (log scale); bubble size shows average total tokens", 14, "middle"),
+        _text(width / 2, 32, "Mean evaluator latency", 22, "middle"),
+        _text(width / 2, 56, "Mean across successful evaluator calls; lower is faster", 14, "middle"),
     ]
-    for fraction in range(5):
-        exponent = log_min + (log_max - log_min) * fraction / 4
-        x = left + (right - left) * fraction / 4
-        parts.append(f'<line x1="{x:.1f}" y1="{top}" x2="{x:.1f}" y2="{bottom}" stroke="{BORDER}" stroke-width="1"/>')
-        parts.append(_text(x, bottom + 24, f"${10 ** exponent:.4g}", 12, "middle"))
-    for fraction in range(5):
-        value = maximum_latency * fraction / 4
-        y = bottom - (bottom - top) * fraction / 4
-        parts.append(f'<line x1="{left}" y1="{y:.1f}" x2="{right}" y2="{y:.1f}" stroke="{BORDER}" stroke-width="1"/>')
-        parts.append(_text(left - 10, y + 4, f"{value:.1f}s", 12, "end"))
-    token_counts = [item["average_input_tokens"] + item["average_output_tokens"] for _, item in values]
-    low_tokens, high_tokens = min(token_counts), max(token_counts)
-    for index, (label, item) in enumerate(values):
-        x = left + (right - left) * (math.log10(item["average_cost"]) - log_min) / (log_max - log_min)
-        y = bottom - (bottom - top) * item["average_latency_seconds"] / maximum_latency
-        tokens = item["average_input_tokens"] + item["average_output_tokens"]
-        radius = 10 + 10 * (tokens - low_tokens) / max(high_tokens - low_tokens, 1)
+    _horizontal_axis(parts, left, right, top, bottom, maximum)
+    for index, (label, latency) in enumerate(values):
+        y = top + 35 + index * 65
+        bar_width = (right - left) * latency / maximum
+        parts.append(_text(left - 12, y + 5, label, 13, "end"))
         parts.append(
-            f'<circle cx="{x:.1f}" cy="{y:.1f}" r="{radius:.1f}" fill="{COLORS[index]}" fill-opacity="0.8">'
-            f'<title>{html.escape(label)}: ${item["average_cost"]:.5f}/call, {item["average_latency_seconds"]:.2f}s, {tokens:.0f} tokens/call</title></circle>'
+            f'<rect x="{left}" y="{y - 15}" width="{bar_width:.1f}" height="30" '
+            f'fill="{COLORS[index]}" fill-opacity="0.85"/>'
         )
-    _legend(parts, [(label, label) for label, _ in values], 530, width)
+        parts.append(_text(left + bar_width + 10, y + 5, f"{latency:.3f}s", 12))
     _guide(
         parts, width, height,
-        "read cost left to right, latency bottom to top, and bubble size as total tokens per call.",
-        "smaller lower-left bubbles are cheaper and faster; upper-right or larger bubbles consume more time or budget.",
+        "compare bar lengths and the mean seconds shown beside each bar.",
+        "shorter bars are faster; small differences may be operationally negligible.",
+    )
+    return _svg(width, height, parts)
+
+
+def _jev_latency(metrics: dict) -> str:
+    jev = metrics["judges"]["Jev"]
+    values = jev["latency_by_repetition_seconds"]
+    percentiles = [("p50", _percentile(jev["latency_seconds"], 0.50)),
+                   ("p90", _percentile(jev["latency_seconds"], 0.90)),
+                   ("p99", _percentile(jev["latency_seconds"], 0.99))]
+    maximum = max(*values, *(value for _, value in percentiles)) * 1.1
+    width, height = 1050, 540
+    left, right, top, bottom = 100, width - 45, 90, 420
+    parts = [
+        _text(width / 2, 32, "Jev latency by repetition", 22, "middle"),
+        _text(width / 2, 56, "Mean across evaluator calls in each repetition; percentile lines use all calls", 14, "middle"),
+    ]
+    _axis(parts, left, right, top, bottom, maximum)
+    for label, value in percentiles:
+        y = bottom - (bottom - top) * value / maximum
+        parts.append(f'<line x1="{left}" y1="{y:.1f}" x2="{right}" y2="{y:.1f}" stroke="{MUTED_TEXT}" stroke-width="1.5" stroke-dasharray="7 5"/>')
+        parts.append(_text(right - 5, y - 6, f"{label} {value:.3f}s", 12, "end", MUTED_TEXT))
+    points = " ".join(
+        f"{left + index * (right - left) / max(len(values) - 1, 1):.1f},"
+        f"{bottom - (bottom - top) * value / maximum:.1f}"
+        for index, value in enumerate(values)
+    )
+    parts.append(f'<polyline points="{points}" fill="none" stroke="{COLORS[0]}" stroke-width="2.5" stroke-linejoin="round"/>')
+    for fraction in range(6):
+        index = round(fraction * (len(values) - 1) / 5)
+        x = left + index * (right - left) / max(len(values) - 1, 1)
+        parts.append(_text(x, bottom + 24, str(index + 1), 12, "middle"))
+    _guide(
+        parts, width, height,
+        "the blue line is mean latency per repetition; dashed lines are call-level percentiles.",
+        "isolated peaks reveal slow repetitions; a large p99-to-median gap reveals a long tail.",
     )
     return _svg(width, height, parts)
 
@@ -374,7 +391,7 @@ def _does_pass_variance(data: dict) -> str:
     row_height = 76
     height = top + row_height * len(data["judges"]) + 105
     parts = [
-        _text(width / 2, 32, "Binary pass/fail variance by frozen case", 22, "middle"),
+        _text(width / 2, 32, "Binary pass/fail variance by recorded case", 22, "middle"),
         _text(width / 2, 56, "Each dot is one case; 0 is stable and 0.25 is a 50/50 pass/fail split", 14, "middle"),
     ]
     bottom = top + row_height * len(data["judges"])
@@ -406,7 +423,7 @@ def _does_pass_accuracy(accuracy: dict) -> str:
     width, height = 1000, 150 + 58 * len(accuracy["judges"])
     left, right, top, bottom = 270, width - 45, 105, height - 75
     parts = [
-        _text(width / 2, 32, "Human-oracle pass/fail accuracy", 22, "middle"),
+        _text(width / 2, 32, "Oracle pass/fail accuracy", 22, "middle"),
         _text(width / 2, 56, "All repeated judge decisions compared with the fixed human label", 14, "middle"),
     ]
     _horizontal_axis(parts, left, right, top, bottom, 1)
@@ -431,7 +448,7 @@ def _quality_agreement(accuracy: dict) -> str:
     maximum_mae = max(result["quality_mae"] for result in accuracy["judges"].values())
     maximum_mae = max(math.ceil(maximum_mae * 10) / 10, 0.1)
     parts = [
-        _text(width / 2, 32, "Human-oracle quality agreement", 22, "middle"),
+        _text(width / 2, 32, "Oracle quality agreement", 22, "middle"),
         _text(
             width / 2,
             56,
@@ -496,7 +513,7 @@ def main() -> None:
         oracle = json.loads(args.oracle_labels.read_text(encoding="utf-8"))
         accuracy = score_oracle(
             data,
-            benchmark["frozen_cases"],
+            benchmark["recorded_cases"],
             oracle,
             args.quality_tolerance,
         )
@@ -512,7 +529,9 @@ def main() -> None:
         outputs["quality-by-repetition.svg"] = _metric_by_repetition(data, repetitions, "quality")
         outputs["quality-oscillation.svg"] = _metric_oscillation(data, repetitions, "quality")
     if trace_metrics["judges"]:
-        outputs["cost-and-latency.svg"] = _cost_and_latency(trace_metrics)
+        outputs["latency-comparison.svg"] = _latency_comparison(trace_metrics)
+    if "Jev" in trace_metrics["judges"] and "latency_seconds" in trace_metrics["judges"]["Jev"]:
+        outputs["jev-latency-by-repetition.svg"] = _jev_latency(trace_metrics)
     if "does_pass" in data["metrics"]:
         outputs["does-pass-oscillation.svg"] = _metric_oscillation(data, repetitions, "does_pass")
         outputs["does-pass-variance.svg"] = _does_pass_variance(data)

@@ -1,7 +1,7 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1000" height="645" viewBox="0 0 1000 645">
 <rect width="100%" height="100%" fill="#030710"/>
 <text x="500.0" y="32.0" font-family="Lausanne, Inter, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="22px" text-anchor="middle" fill="#FFFFFF">Evaluator-returned quality score oscillation across 100 repetitions</text>
-<text x="500.0" y="56.0" font-family="Lausanne, Inter, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="14px" text-anchor="middle" fill="#FFFFFF">Mean evaluator-returned quality score across five frozen cases; shared zoomed y-axis</text>
+<text x="500.0" y="56.0" font-family="Lausanne, Inter, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="14px" text-anchor="middle" fill="#FFFFFF">Mean evaluator-returned quality score across five recorded cases; shared zoomed y-axis</text>
 <line x1="260" y1="164.0" x2="960" y2="164.0" stroke="#1A2740" stroke-width="1"/>
 <text x="250.0" y="168.0" font-family="Lausanne, Inter, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="11px" text-anchor="end" fill="#FFFFFF">0.75</text>
 <line x1="260" y1="123.0" x2="960" y2="123.0" stroke="#1A2740" stroke-width="1"/>
@@ -40,6 +40,6 @@
 <text x="677.2" y="576.0" font-family="Lausanne, Inter, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="12px" text-anchor="middle" fill="#FFFFFF">60</text>
 <text x="818.6" y="576.0" font-family="Lausanne, Inter, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="12px" text-anchor="middle" fill="#FFFFFF">80</text>
 <text x="960.0" y="576.0" font-family="Lausanne, Inter, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="12px" text-anchor="middle" fill="#FFFFFF">100</text>
-<text x="500.0" y="611.0" font-family="Lausanne, Inter, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="11px" text-anchor="middle" fill="#C8DDF0">How to read: each point is the mean across frozen cases for one repetition; panels share one zoomed scale.</text>
+<text x="500.0" y="611.0" font-family="Lausanne, Inter, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="11px" text-anchor="middle" fill="#C8DDF0">How to read: each point is the mean across recorded cases for one repetition; panels share one zoomed scale.</text>
 <text x="500.0" y="629.0" font-family="Lausanne, Inter, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="11px" text-anchor="middle" fill="#C8DDF0">What it means: a flat line is repeatable; frequent swings are noisy; isolated spikes or dips are one-off judgement changes.</text>
 </svg>

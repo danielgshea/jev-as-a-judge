@@ -1,0 +1,411 @@
+{
+  "analysis": {
+    "analysis": {
+      "bootstrap_samples": 10000,
+      "bootstrap_unit": "recorded case",
+      "confidence_level": 0.95,
+      "variance_definition": "unbiased sample variance within each recorded case"
+    },
+    "comparison": {
+      "semif": {
+        "does_pass": {
+          "jev_mean_variance": 0.002,
+          "judge_mean_variance": 0.0,
+          "judge_to_jev_variance_ratio": 0.0,
+          "mean_difference_95_ci": [
+            -0.594,
+            0.0
+          ],
+          "mean_difference_judge_minus_jev": -0.198,
+          "variance_difference_95_ci": [
+            -0.006,
+            0.0
+          ],
+          "variance_difference_judge_minus_jev": -0.002,
+          "variance_ratio_95_ci": [
+            0.0,
+            0.0
+          ]
+        },
+        "quality": {
+          "jev_mean_variance": 1.8995279595959625e-05,
+          "judge_mean_variance": 3.2345055353535445e-05,
+          "judge_to_jev_variance_ratio": 1.7027943805794452,
+          "mean_difference_95_ci": [
+            -0.35800099999999996,
+            -0.01274540000000004
+          ],
+          "mean_difference_judge_minus_jev": -0.18537320000000002,
+          "variance_difference_95_ci": [
+            -8.909414343434236e-06,
+            3.853178666666669e-05
+          ],
+          "variance_difference_judge_minus_jev": 1.3349775757575823e-05,
+          "variance_ratio_95_ci": [
+            0.5753732542697959,
+            3.7874921040208647
+          ]
+        }
+      }
+    },
+    "summary": {
+      "jev": {
+        "choice": {
+          "max_disagreement_rate": 0.0,
+          "mean_disagreement_rate": 0.0,
+          "mean_disagreement_rate_95_ci": [
+            0.0,
+            0.0
+          ]
+        },
+        "does_pass": {
+          "max_variance": 0.01,
+          "mean": 0.798,
+          "mean_95_ci": [
+            0.398,
+            1.0
+          ],
+          "mean_variance": 0.002,
+          "mean_variance_95_ci": [
+            0.0,
+            0.006
+          ],
+          "stddev": 0.4018943120724058
+        },
+        "quality": {
+          "max_variance": 4.320798383838388e-05,
+          "mean": 0.9031008,
+          "mean_95_ci": [
+            0.865245,
+            0.940695
+          ],
+          "mean_variance": 1.8995279595959625e-05,
+          "mean_variance_95_ci": [
+            7.388915959595989e-06,
+            3.1413507474747526e-05
+          ],
+          "stddev": 0.04462555051624299
+        }
+      },
+      "semif": {
+        "choice": {
+          "max_disagreement_rate": 0.0,
+          "mean_disagreement_rate": 0.0,
+          "mean_disagreement_rate_95_ci": [
+            0.0,
+            0.0
+          ]
+        },
+        "does_pass": {
+          "max_variance": 0.0,
+          "mean": 0.6,
+          "mean_95_ci": [
+            0.2,
+            1.0
+          ],
+          "mean_variance": 0.0,
+          "mean_variance_95_ci": [
+            0.0,
+            0.0
+          ],
+          "stddev": 0.49038858257900714
+        },
+        "quality": {
+          "max_variance": 8.090128787878791e-05,
+          "mean": 0.7177276,
+          "mean_95_ci": [
+            0.5608658,
+            0.8745894
+          ],
+          "mean_variance": 3.2345055353535445e-05,
+          "mean_variance_95_ci": [
+            1.1396500808080875e-05,
+            5.797099030303043e-05
+          ],
+          "stddev": 0.18373703828219673
+        }
+      }
+    }
+  },
+  "experiment": {
+    "id": "aaa78b6a-f6be-4542-a125-1941c7a8b5df",
+    "metadata": {
+      "__ls_runner": "py_sdk_evaluate",
+      "dataset_splits": [
+        "base"
+      ],
+      "dataset_version": "2026-09-23T15:38:30.889773+00:00",
+      "git": {
+        "author_email": "daniel.shea@langchain.dev",
+        "author_name": "Daniel Shea",
+        "branch": "main",
+        "commit": "adfea74905f721ea2594e22804c8c8edf1693163",
+        "commit_time": "1789838447",
+        "dirty": true,
+        "remote_url": "https://github.com/danielgshea/jev-as-a-judge.git",
+        "repo_name": "jev-as-a-judge",
+        "tags": null
+      },
+      "judge_models": {
+        "jev": "typesafe/jev-1.13.0",
+        "semif": "semif-qwen3.5-4b"
+      },
+      "num_repetitions": 100,
+      "revision_id": "adfea74-dirty"
+    },
+    "name": "judge-reliability-jev-semif-f0dc697d",
+    "started_at": "2026-09-23T17:57:17.968073+00:00"
+  },
+  "experiment_id": "aaa78b6a-f6be-4542-a125-1941c7a8b5df",
+  "recorded_cases": [
+    {
+      "inputs": {
+        "question": "What is the forecast for Tokyo next week?"
+      },
+      "metadata": {
+        "category": "extended_forecast",
+        "dataset_split": [
+          "base"
+        ],
+        "generator_model": "openai:gpt-5.5",
+        "state_size": 3252
+      },
+      "outputs": {
+        "answer": "For **Tokyo, Japan**, interpreting \u201cnext week\u201d as **Sep 28\u2013Oct 4, 2026**:\n\nI found forecast details for **Oct 1\u20134** only; the search result did not provide reliable details for **Sep 28\u201330**.\n\n| Date | Forecast | Temp | Precipitation |\n|---|---|---:|---:|\n| Thu, Oct 1 | Moderate/heavy rain showers | 25\u00b0 / 20\u00b0C | ~18.4 mm |\n| Fri, Oct 2 | Sunny | 27\u00b0 / 19\u00b0C | ~2.3 mm |\n| Sat, Oct 3 | Partly cloudy | 26\u00b0 / 20\u00b0C | ~0.8 mm |\n| Sun, Oct 4 | Light rain showers | 27\u00b0 / 20\u00b0C | ~7.2 mm |\n\nOverall: **mild to warm**, with **rain likely around Oct 1 and Oct 4**, and drier weather in between.\n\nSources:  \n- EaseWeather Tokyo October forecast: https://www.easeweather.com/asia/japan/tokyo/october  \n- Meteoprog Tokyo monthly forecast: https://www.meteoprog.com/weather/Tokyo/month/october",
+        "evidence": [
+          {
+            "excerpt": "Date | Weather | Temperatures | Rain | UV | More || 1 Oct. | Moderate or heavy rain shower Moderate or heavy rain shower | 25\u00b0 /20\u00b0 | 18.4 mm | 6 | | 2 Oct. | Sunny Sunny | 27\u00b0 /19\u00b0 | 2.3 mm | 6 | | 3 Oct. | Partly cloudy Partly cloudy | 26\u00b0 /20\u00b0 | 0.8 mm | 6 | | 4 Oct. | Light rain shower Light rain shower | 27\u00b0 /20\u00b0 | 7.2 mm | 6 | | 5 Oct. | Patc",
+            "title": "Weather in Tokyo in October 2026 - Detailed Forecast",
+            "url": "https://www.easeweather.com/asia/japan/tokyo/october"
+          },
+          {
+            "excerpt": "+25\u00b0+20\u00b0 1 October +25\u00b0+19\u00b0 2 October +25\u00b0+19\u00b0 3 October +25\u00b0+19\u00b0 4 October +24\u00b0+19\u00b0 5 October +22\u00b0+18\u00b0 6 October +24\u00b0+18\u00b0 7 October +23\u00b0+18\u00b0 8 October +23\u00b0+18\u00b0 9 October +22\u00b0+17\u00b0 10 October +23\u00b0+18\u00b0 11 October +24\u00b0+18\u00b0 12 October +23\u00b0+17\u00b0 13 October +22\u00b0+16\u00b0 14 October +22\u00b0+16\u00b0 15 October +22\u00b0+16\u00b0 16 October +21\u00b0+15\u00b0 17 October +21\u00b0+15\u00b0 18 October",
+            "title": "October weather in Tokyo \u2261 Weather forecast in Tokyo (Japan) in October 2026 | METEOPROG",
+            "url": "https://www.meteoprog.com/weather/Tokyo/month/october"
+          },
+          {
+            "excerpt": "Click on a day for an hourly weather forecast ## The average weather in Tokyo in October The temperatures in Tokyo in October are comfortable with low of 15\u00b0C and and high up to 22\u00b0C. You can expect about 3 to 8 days of rain in Tokyo during the month of October. It\u2019s a good idea to bring along your umbrella so that you don\u2019t get caught in poor weat",
+            "title": "Tokyo weather in October 2026 | Tokyo 14 day weather",
+            "url": "https://www.weather25.com/amp/asia/japan/tokyo?page=month&month=October"
+          },
+          {
+            "excerpt": "{'location': {'name': 'Tokyo', 'region': 'Tokyo', 'country': 'Japan', 'lat': 35.6895, 'lon': 139.6917, 'tz_id': 'Asia/Tokyo', 'localtime_epoch': 1790177755, 'localtime': '2026-09-24 00:35'}, 'current': {'last_updated_epoch': 1790176500, 'last_updated': '2026-09-24 00:15', 'temp_c': 20.9, 'temp_f': 69.7, 'is_day': 0, 'condition': {'text': 'Patchy ra",
+            "title": "Weather in Tokyo",
+            "url": "https://www.weatherapi.com/"
+          }
+        ],
+        "tool_calls": [
+          "search_weather"
+        ]
+      },
+      "reference_outputs": {
+        "expected_behavior": {
+          "location": "Tokyo",
+          "search_required": true
+        },
+        "oracle": {
+          "does_pass": 1,
+          "is_grounded": 1,
+          "is_useful": 1,
+          "matches_search_expectation": 1,
+          "reasoning": {
+            "does_pass": "The response is grounded, follows the search requirement, and is useful.",
+            "is_grounded": "The forecast is supported by the recorded search evidence.",
+            "is_useful": "It addresses the requested week and provides source links.",
+            "matches_search_expectation": "The agent searched before answering the unambiguous Tokyo request."
+          }
+        }
+      }
+    },
+    {
+      "inputs": {
+        "question": "What is the weather in Seattle today?"
+      },
+      "metadata": {
+        "category": "current_conditions",
+        "dataset_split": [
+          "base"
+        ],
+        "generator_model": "openai:gpt-5.5",
+        "state_size": 2592
+      },
+      "outputs": {
+        "answer": "Seattle, WA \u2014 today (Sep. 23, 2026): around 8:30 AM local time, it\u2019s **54\u00b0F (12.5\u00b0C)**. The National Weather Service discussion indicates **cooler temperatures and cloudy skies**, with **some drizzle into Wednesday**.\n\nSources:  \n- WeatherAPI current conditions: https://www.weatherapi.com/  \n- National Weather Service Seattle forecast discussion: https://forecast.weather.gov/product.php?site=sew&issuedby=sew&product=AFD&format=CI&version=1&glossary=1",
+        "evidence": [
+          {
+            "excerpt": "{'location': {'name': 'Seattle', 'region': 'Washington', 'country': 'United States of America', 'lat': 47.6064, 'lon': -122.3308, 'tz_id': 'America/Los_Angeles', 'localtime_epoch': 1790177874, 'localtime': '2026-09-23 08:37'}, 'current': {'last_updated_epoch': 1790177400, 'last_updated': '2026-09-23 08:30', 'temp_c': 12.5, 'temp_f': 54.4, 'is_day':",
+            "title": "Weather in Seattle",
+            "url": "https://www.weatherapi.com/"
+          },
+          {
+            "excerpt": "## 2026 ## 10-Day Clouds giving way to some sun Rain and drizzle in the a.m. A couple of afternoon showers Cloudy with showers around Partly sunny Cloudy most of the time Mostly cloudy Rain becoming steadier Cloudy with a shower in spots Partly sunny An a.m. shower, then showers Sun, then clouds ## Temperature Graph ## September Weather in Seattle ",
+            "title": "Seattle, WA Monthly Weather",
+            "url": "https://www.accuweather.com/en/us/seattle/98104/september-weather/351409"
+          },
+          {
+            "excerpt": "643 FXUS66 KSEW 222127 AFDSEW Area Forecast Discussion National Weather Service Seattle WA 227 PM PDT Tue Sep 22 2026 .SYNOPSIS... Onshore flow will maintain cooler temperatures and cloudy skies through Thursday, with some drizzle tonight into Wednesday. A stronger system will bring showers across western Washington Thursday morning, with more wide",
+            "title": "National Weather Service",
+            "url": "https://forecast.weather.gov/product.php?site=sew&issuedby=sew&product=AFD&format=CI&version=1&glossary=1"
+          },
+          {
+            "excerpt": "| Dates | Weather Conditions | | Oct 1-3 | Rainy, chilly | | Oct 4-17 | Sunny, cool | | Oct 18-23 | Showers north, rainy periods south; mild | | Oct 24-31 | Isolated showers, warm | | October | temperature 54\u00b0 (1\u00b0 below avg.) precipitation 3\" (1.5\" below avg. north, 0.5\" above south) | Map showing Old Farmer's Almanac long range weather region numb",
+            "title": "Long-Range Weather Forecast for Seattle, WA",
+            "url": "https://www.almanac.com/weather/longrange/wa/seattle"
+          }
+        ],
+        "tool_calls": [
+          "search_weather"
+        ]
+      },
+      "reference_outputs": {
+        "expected_behavior": {
+          "location": "Seattle",
+          "search_required": true
+        },
+        "oracle": {
+          "does_pass": 1,
+          "is_grounded": 1,
+          "is_useful": 1,
+          "matches_search_expectation": 1,
+          "reasoning": {
+            "does_pass": "The response is grounded, follows the search requirement, and is useful.",
+            "is_grounded": "The reported conditions are supported by the recorded search evidence.",
+            "is_useful": "It provides current weather details and source links.",
+            "matches_search_expectation": "The agent searched before answering the unambiguous Seattle request."
+          }
+        }
+      }
+    },
+    {
+      "inputs": {
+        "question": "What is the weather in Springfield today?"
+      },
+      "metadata": {
+        "category": "ambiguous_location",
+        "dataset_split": [
+          "base"
+        ],
+        "generator_model": "openai:gpt-5.5",
+        "state_size": 328
+      },
+      "outputs": {
+        "answer": "Which Springfield do you mean? For example: Springfield, Illinois; Springfield, Massachusetts; Springfield, Missouri; or another Springfield.",
+        "evidence": [],
+        "tool_calls": []
+      },
+      "reference_outputs": {
+        "expected_behavior": {
+          "location": "Springfield",
+          "search_required": false
+        },
+        "oracle": {
+          "does_pass": 1,
+          "is_grounded": 1,
+          "is_useful": 1,
+          "matches_search_expectation": 1,
+          "reasoning": {
+            "does_pass": "Clarification is the expected response for the ambiguous request.",
+            "is_grounded": "The clarification makes no unsupported weather claim.",
+            "is_useful": "It asks for the missing state or country.",
+            "matches_search_expectation": "The ambiguous location correctly triggers clarification without a search."
+          }
+        }
+      }
+    },
+    {
+      "inputs": {
+        "question": "What will the weather be like in Austin, Texas this weekend?"
+      },
+      "metadata": {
+        "category": "multi_day_forecast",
+        "dataset_split": [
+          "base"
+        ],
+        "generator_model": "openai:gpt-5.5",
+        "state_size": 2925
+      },
+      "outputs": {
+        "answer": "For **Austin, Texas**, this weekend \u2014 **Saturday\u2013Sunday, Sept. 26\u201327, 2026** \u2014 the available forecast search results suggest:\n\n- **Saturday:** Partly sunny and hot  \n- **Sunday:** Mostly sunny and hot  \n- **Rain/precipitation:** No specific precipitation chance was available in the search excerpt for the weekend.  \n- **Temperatures:** Exact weekend highs/lows were not available in the search excerpt.\n\nSources:  \n- National Weather Service Austin point forecast: https://forecast.weather.gov/MapClick.php?lat=30.26759000000004&lon=-97.74298999999996  \n- AccuWeather Austin monthly/10-day forecast: https://www.accuweather.com/en/us/austin/78701/september-weather/351193",
+        "evidence": [
+          {
+            "excerpt": "{'location': {'name': 'Austin', 'region': 'Texas', 'country': 'United States of America', 'lat': 30.2669, 'lon': -97.7428, 'tz_id': 'America/Chicago', 'localtime_epoch': 1790177881, 'localtime': '2026-09-23 10:38'}, 'current': {'last_updated_epoch': 1790177400, 'last_updated': '2026-09-23 10:30', 'temp_c': 29.3, 'temp_f': 84.7, 'is_day': 1, 'condit",
+            "title": "Weather in Austin, Texas",
+            "url": "https://www.weatherapi.com/"
+          },
+          {
+            "excerpt": "Weather Archive Widget METAR World United States Texas Weather in Austin # Weather in Austin in September 2026 Austin Weather Forecast for September 2026 is based on long term prognosis and previous years' statistical data. JanFebMarAprMayJunJulAugSepOctNovDec ## September Start Week On Sun Mon Tue Wed Thu Fri Sat +93\u00b0 6.9 mph S 29.5 inHg66 %07:06 ",
+            "title": "Weather in Austin in September 2026 (Texas) - detailed Weather Forecast for a month",
+            "url": "https://world-weather.info/forecast/usa/austin_1/september-2026"
+          },
+          {
+            "excerpt": "## 2026 ## 10-Day A stray afternoon t-storm A t-storm around in the p.m. A t-storm around in the p.m. Partly sunny and hot Mostly sunny and hot Rather cloudy and very warm Hot with decreasing clouds Very warm with periods of sun Sunshine and very warm Sunshine and very warm Rain and a thunderstorm Partly sunny Mostly sunny and humid ## Temperature ",
+            "title": "Austin, TX Monthly Weather | AccuWeather",
+            "url": "https://www.accuweather.com/en/us/austin/78701/september-weather/351193"
+          },
+          {
+            "excerpt": "Point Forecast Matrices Fire Weather Drought Rivers & Lakes Climate Data NOAA Weather Radio Contact Local Office Basemap Options Click map to change the forecast location Loading map... Forecast Area Disclaimer Tiles \u00a9ESRI ## ABOUT THIS FORECAST Point Forecast: Austin TX 30.27\u00b0N 97.74\u00b0W (Elev. 509 ft) Last Update: 6:42 am CDT Sep 22, 2026 Forecast ",
+            "title": "7-Day Forecast 30.27N 97.74W - National Weather Service",
+            "url": "https://forecast.weather.gov/MapClick.php?lat=30.26759000000004&lon=-97.74298999999996"
+          }
+        ],
+        "tool_calls": [
+          "search_weather"
+        ]
+      },
+      "reference_outputs": {
+        "expected_behavior": {
+          "location": "Austin",
+          "search_required": true
+        },
+        "oracle": {
+          "does_pass": 1,
+          "is_grounded": 1,
+          "is_useful": 1,
+          "matches_search_expectation": 1,
+          "reasoning": {
+            "does_pass": "The response is grounded, follows the search requirement, and is useful.",
+            "is_grounded": "The weekend forecast is supported by the recorded search evidence.",
+            "is_useful": "It addresses the requested weekend and provides source links.",
+            "matches_search_expectation": "The agent searched before answering the unambiguous Austin request."
+          }
+        }
+      }
+    },
+    {
+      "inputs": {
+        "question": "Will I need an umbrella in Dublin tomorrow?"
+      },
+      "metadata": {
+        "category": "weather_decision",
+        "dataset_split": [
+          "base"
+        ],
+        "generator_model": "openai:gpt-5.5",
+        "state_size": 282
+      },
+      "outputs": {
+        "answer": "Which Dublin do you mean \u2014 Dublin, Ireland, or another Dublin (e.g., Dublin, Ohio/California)?",
+        "evidence": [],
+        "tool_calls": []
+      },
+      "reference_outputs": {
+        "expected_behavior": {
+          "location": "Dublin",
+          "search_required": true
+        },
+        "oracle": {
+          "does_pass": 0,
+          "is_grounded": 1,
+          "is_useful": 1,
+          "matches_search_expectation": 0,
+          "reasoning": {
+            "does_pass": "The useful clarification still fails the experiment's required-search behavior.",
+            "is_grounded": "The clarification makes no unsupported weather claim.",
+            "is_useful": "It identifies the location ambiguity and asks the user to resolve it.",
+            "matches_search_expectation": "The expected behavior requires a search, but the recorded response asks for location clarification."
+          }
+        }
+      }
+    }
+  ]
+}

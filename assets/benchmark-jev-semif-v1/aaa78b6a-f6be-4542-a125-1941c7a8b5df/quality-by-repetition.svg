@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="329" viewBox="0 0 1000 329">
+<rect width="100%" height="100%" fill="#030710"/>
+<text x="500.0" y="32.0" font-family="Lausanne, Inter, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="22px" text-anchor="middle" fill="#FFFFFF">Mean quality by repetition</text>
+<text x="500.0" y="56.0" font-family="Lausanne, Inter, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="14px" text-anchor="middle" fill="#FFFFFF">Boxes show the middle 50%; whiskers show the full observed range.</text>
+<line x1="220.0" y1="82" x2="220.0" y2="186" stroke="#1A2740" stroke-width="1"/>
+<text x="220.0" y="206.0" font-family="Lausanne, Inter, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="12px" text-anchor="middle" fill="#FFFFFF">0.0</text>
+<line x1="368.0" y1="82" x2="368.0" y2="186" stroke="#1A2740" stroke-width="1"/>
+<text x="368.0" y="206.0" font-family="Lausanne, Inter, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="12px" text-anchor="middle" fill="#FFFFFF">0.2</text>
+<line x1="516.0" y1="82" x2="516.0" y2="186" stroke="#1A2740" stroke-width="1"/>
+<text x="516.0" y="206.0" font-family="Lausanne, Inter, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="12px" text-anchor="middle" fill="#FFFFFF">0.4</text>
+<line x1="664.0" y1="82" x2="664.0" y2="186" stroke="#1A2740" stroke-width="1"/>
+<text x="664.0" y="206.0" font-family="Lausanne, Inter, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="12px" text-anchor="middle" fill="#FFFFFF">0.6</text>
+<line x1="812.0" y1="82" x2="812.0" y2="186" stroke="#1A2740" stroke-width="1"/>
+<text x="812.0" y="206.0" font-family="Lausanne, Inter, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="12px" text-anchor="middle" fill="#FFFFFF">0.8</text>
+<line x1="960.0" y1="82" x2="960.0" y2="186" stroke="#1A2740" stroke-width="1"/>
+<text x="960.0" y="206.0" font-family="Lausanne, Inter, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="12px" text-anchor="middle" fill="#FFFFFF">1.0</text>
+<text x="208.0" y="111.0" font-family="Lausanne, Inter, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="12px" text-anchor="end" fill="#FFFFFF">Jev</text>
+<line x1="884.0" y1="106" x2="890.9" y2="106" stroke="#C8DDF0" stroke-width="2"/>
+<rect x="887.5" y="94" width="2.0" height="24" fill="#7FC8FF" fill-opacity="0.75"/>
+<line x1="888.5" y1="92" x2="888.5" y2="120" stroke="#FFFFFF" stroke-width="2"/>
+<text x="208.0" y="163.0" font-family="Lausanne, Inter, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="12px" text-anchor="end" fill="#FFFFFF">SemIf</text>
+<line x1="745.5" y1="158" x2="755.7" y2="158" stroke="#C8DDF0" stroke-width="2"/>
+<rect x="749.4" y="146" width="3.6" height="24" fill="#E3FF8F" fill-opacity="0.75"/>
+<line x1="750.9" y1="144" x2="750.9" y2="172" stroke="#FFFFFF" stroke-width="2"/>
+<text x="500.0" y="295.0" font-family="Lausanne, Inter, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="11px" text-anchor="middle" fill="#C8DDF0">How to read: boxes cover the middle half of repetition means; whiskers show the full range.</text>
+<text x="500.0" y="313.0" font-family="Lausanne, Inter, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="11px" text-anchor="middle" fill="#C8DDF0">What it means: a narrow box and short whiskers are steady; a wide range signals drift or occasional outlier judgments.</text>
+</svg>

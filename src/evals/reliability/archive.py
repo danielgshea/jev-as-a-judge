@@ -5,11 +5,7 @@ from pathlib import Path
 from dotenv import load_dotenv
 from langsmith import Client
 
-from evals.judge_reliability import JUDGES, _summarize
-
-
-def _source_run_id(feedback: dict) -> str:
-    return json.loads(feedback["sources"][0])["metadata"]["__run"]["run_id"]
+from evals.reliability.statistics import JUDGES, summarize
 
 
 def archive(experiment_id: str, output: Path) -> None:
@@ -21,14 +17,12 @@ def archive(experiment_id: str, output: Path) -> None:
         ]
     )
     records = []
-    frozen_cases = []
+    recorded_cases = []
     for case, row in enumerate(sorted(rows, key=lambda row: row.inputs["question"])):
-        quality = row.runs[0].feedback_stats["jev_weather_quality"]
-        evaluator_run = client.read_run(_source_run_id(quality))
-        frozen_cases.append(
+        recorded_cases.append(
             {
-                "inputs": row.inputs,
-                "outputs": evaluator_run.inputs["inputs"]["_frozen_output"],
+                "inputs": {"question": row.inputs["question"]},
+                "outputs": row.inputs["recorded_response"],
                 "reference_outputs": row.outputs,
                 "metadata": row.metadata,
             }
@@ -54,8 +48,8 @@ def archive(experiment_id: str, output: Path) -> None:
                     "started_at": project.start_time.isoformat(),
                     "metadata": project.metadata,
                 },
-                "frozen_cases": frozen_cases,
-                "analysis": _summarize(records, len(frozen_cases)),
+                "recorded_cases": recorded_cases,
+                "analysis": summarize(records, len(recorded_cases)),
             },
             indent=2,
             sort_keys=True,

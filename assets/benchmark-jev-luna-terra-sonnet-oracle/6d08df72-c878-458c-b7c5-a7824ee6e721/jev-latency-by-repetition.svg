@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1050" height="540" viewBox="0 0 1050 540">
+<rect width="100%" height="100%" fill="#030710"/>
+<text x="525.0" y="32.0" font-family="Lausanne, Inter, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="22px" text-anchor="middle" fill="#FFFFFF">Jev latency by repetition</text>
+<text x="525.0" y="56.0" font-family="Lausanne, Inter, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="14px" text-anchor="middle" fill="#FFFFFF">Mean across evaluator calls in each repetition; percentile lines use all calls</text>
+<line x1="100" y1="420.0" x2="1005" y2="420.0" stroke="#1A2740" stroke-width="1"/>
+<text x="90.0" y="425.0" font-family="Lausanne, Inter, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="12px" text-anchor="end" fill="#FFFFFF">0</text>
+<line x1="100" y1="354.0" x2="1005" y2="354.0" stroke="#1A2740" stroke-width="1"/>
+<text x="90.0" y="359.0" font-family="Lausanne, Inter, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="12px" text-anchor="end" fill="#FFFFFF">0.173</text>
+<line x1="100" y1="288.0" x2="1005" y2="288.0" stroke="#1A2740" stroke-width="1"/>
+<text x="90.0" y="293.0" font-family="Lausanne, Inter, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="12px" text-anchor="end" fill="#FFFFFF">0.346</text>
+<line x1="100" y1="222.0" x2="1005" y2="222.0" stroke="#1A2740" stroke-width="1"/>
+<text x="90.0" y="227.0" font-family="Lausanne, Inter, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="12px" text-anchor="end" fill="#FFFFFF">0.519</text>
+<line x1="100" y1="156.0" x2="1005" y2="156.0" stroke="#1A2740" stroke-width="1"/>
+<text x="90.0" y="161.0" font-family="Lausanne, Inter, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="12px" text-anchor="end" fill="#FFFFFF">0.692</text>
+<line x1="100" y1="90.0" x2="1005" y2="90.0" stroke="#1A2740" stroke-width="1"/>
+<text x="90.0" y="95.0" font-family="Lausanne, Inter, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="12px" text-anchor="end" fill="#FFFFFF">0.865</text>
+<line x1="100" y1="268.9" x2="1005" y2="268.9" stroke="#C8DDF0" stroke-width="1.5" stroke-dasharray="7 5"/>
+<text x="1000.0" y="262.9" font-family="Lausanne, Inter, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="12px" text-anchor="end" fill="#C8DDF0">p50 0.396s</text>
+<line x1="100" y1="177.7" x2="1005" y2="177.7" stroke="#C8DDF0" stroke-width="1.5" stroke-dasharray="7 5"/>
+<text x="1000.0" y="171.7" font-family="Lausanne, Inter, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="12px" text-anchor="end" fill="#C8DDF0">p90 0.635s</text>
+<line x1="100" y1="120.0" x2="1005" y2="120.0" stroke="#C8DDF0" stroke-width="1.5" stroke-dasharray="7 5"/>
+<text x="1000.0" y="114.0" font-family="Lausanne, Inter, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="12px" text-anchor="end" fill="#C8DDF0">p99 0.786s</text>
+<polyline points="100.0,245.5 109.1,259.1 118.3,248.2 127.4,250.1 136.6,247.1 145.7,248.2 154.8,232.6 164.0,262.6 173.1,254.2 182.3,238.2 191.4,251.5 200.6,248.4 209.7,260.2 218.8,249.8 228.0,257.5 237.1,250.4 246.3,252.2 255.4,249.6 264.5,246.6 273.7,225.8 282.8,246.6 292.0,226.7 301.1,256.9 310.3,246.6 319.4,256.0 328.5,251.6 337.7,262.3 346.8,244.0 356.0,252.5 365.1,258.8 374.2,253.4 383.4,260.9 392.5,263.4 401.7,259.2 410.8,250.2 419.9,260.7 429.1,251.7 438.2,246.6 447.4,254.4 456.5,245.7 465.7,240.6 474.8,253.8 483.9,251.8 493.1,260.1 502.2,255.5 511.4,259.2 520.5,260.1 529.6,258.9 538.8,249.4 547.9,249.5 557.1,259.0 566.2,231.0 575.4,252.8 584.5,254.7 593.6,265.3 602.8,258.2 611.9,244.6 621.1,242.4 630.2,257.6 639.3,261.5 648.5,262.3 657.6,251.8 666.8,261.0 675.9,255.7 685.1,260.5 694.2,236.7 703.3,255.0 712.5,254.2 721.6,244.4 730.8,259.7 739.9,260.2 749.0,256.9 758.2,253.7 767.3,257.6 776.5,247.8 785.6,244.2 794.7,236.9 803.9,252.9 813.0,260.0 822.2,238.7 831.3,247.1 840.5,244.2 849.6,252.7 858.7,251.9 867.9,229.8 877.0,254.7 886.2,244.3 895.3,246.2 904.4,251.6 913.6,255.6 922.7,251.8 931.9,250.8 941.0,256.5 950.2,254.5 959.3,246.4 968.4,247.7 977.6,250.3 986.7,248.9 995.9,248.5 1005.0,246.3" fill="none" stroke="#7FC8FF" stroke-width="2.5" stroke-linejoin="round"/>
+<text x="100.0" y="444.0" font-family="Lausanne, Inter, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="12px" text-anchor="middle" fill="#FFFFFF">1</text>
+<text x="282.8" y="444.0" font-family="Lausanne, Inter, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="12px" text-anchor="middle" fill="#FFFFFF">21</text>
+<text x="465.7" y="444.0" font-family="Lausanne, Inter, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="12px" text-anchor="middle" fill="#FFFFFF">41</text>
+<text x="639.3" y="444.0" font-family="Lausanne, Inter, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="12px" text-anchor="middle" fill="#FFFFFF">60</text>
+<text x="822.2" y="444.0" font-family="Lausanne, Inter, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="12px" text-anchor="middle" fill="#FFFFFF">80</text>
+<text x="1005.0" y="444.0" font-family="Lausanne, Inter, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="12px" text-anchor="middle" fill="#FFFFFF">100</text>
+<text x="525.0" y="506.0" font-family="Lausanne, Inter, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="11px" text-anchor="middle" fill="#C8DDF0">How to read: the blue line is mean latency per repetition; dashed lines are call-level percentiles.</text>
+<text x="525.0" y="524.0" font-family="Lausanne, Inter, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="11px" text-anchor="middle" fill="#C8DDF0">What it means: isolated peaks reveal slow repetitions; a large p99-to-median gap reveals a long tail.</text>
+</svg>

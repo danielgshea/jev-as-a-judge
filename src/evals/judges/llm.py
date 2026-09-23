@@ -4,8 +4,8 @@ from typing import Literal
 from langsmith import traceable
 from pydantic import BaseModel
 
-from ..model import LLM_JUDGES, ModelConfig, create_chat_model
-from . import judge_state
+from ..config import LLM_JUDGES, ModelConfig, create_chat_model
+from .state import judge_state
 
 
 class LLMQualityResult(BaseModel):
@@ -27,10 +27,10 @@ def _llm_prompt(state: dict, instructions: str) -> str:
 
 
 def _build_evaluators(prefix: str, config: ModelConfig) -> tuple:
-    llm = create_chat_model(config)
 
     @traceable(name=f"{prefix}_weather_quality")
     def run_quality(state: dict) -> LLMQualityResult:
+        llm = create_chat_model(config)
         judge = llm.with_structured_output(LLMQualityResult, method="json_schema")
         return judge.invoke(
             _llm_prompt(
@@ -56,6 +56,7 @@ or asks for clarification when appropriate.""",
 
     @traceable(name=f"{prefix}_weather_does_pass")
     def run_does_pass(state: dict) -> LLMDoesPassResult:
+        llm = create_chat_model(config)
         judge = llm.with_structured_output(LLMDoesPassResult, method="json_schema")
         return judge.invoke(
             _llm_prompt(
@@ -74,6 +75,7 @@ or asks for clarification when appropriate.""",
 
     @traceable(name=f"{prefix}_weather_choice")
     def run_choice(state: dict) -> LLMChoiceResult:
+        llm = create_chat_model(config)
         judge = llm.with_structured_output(LLMChoiceResult, method="json_schema")
         return judge.invoke(
             _llm_prompt(
@@ -96,7 +98,8 @@ location; poor: fails to answer usefully or makes unsupported weather claims."""
     return quality, does_pass, choice
 
 
-LLM_EVALUATORS = {
-    prefix: _build_evaluators(prefix, config)
-    for prefix, config in LLM_JUDGES.items()
-}
+def build_llm_evaluators() -> dict:
+    return {
+        prefix: _build_evaluators(prefix, config)
+        for prefix, config in LLM_JUDGES.items()
+    }

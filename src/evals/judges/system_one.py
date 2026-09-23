@@ -1,11 +1,16 @@
-from dotenv import load_dotenv
+import os
+import time
+
 from langsmith import traceable
 from langchain_typesafe import Choice, Noul, TypeSafeClassifier
+from langchain_typesafe.client import (
+    TypeSafeAPIConnectionError,
+    TypeSafeAPIError,
+    TypeSafeRateLimitError,
+)
 
-from . import CHOICE_CRITERIA, judge_state
-
-
-load_dotenv()
+from ..config import DECISION_GATEWAY_BASE_URL, DECISION_JUDGES, ModelConfig
+from .state import CHOICE_CRITERIA, judge_state
 
 
 QUALITY_QUESTIONS = {
@@ -43,59 +48,102 @@ CHOICE_QUESTIONS = {
 }
 
 
-@traceable(name="jev_weather_judge")
-def _run_jev_judge(state: dict) -> dict:
-    response = TypeSafeClassifier(questions=QUALITY_QUESTIONS).invoke(state)
-    return {name: answer.noul for name, answer in response.nouls.items()}
+def _classifier(config: ModelConfig, questions: dict) -> TypeSafeClassifier:
+    return TypeSafeClassifier(
+        questions=questions,
+        model=config.model,
+        api_key=os.environ[config.api_key_env],
+        base_url=DECISION_GATEWAY_BASE_URL,
+        timeout=180,
+    )
 
 
-def jev_weather_quality(inputs: dict, outputs: dict, reference_outputs: dict) -> dict:
-    """Use Jev to score groundedness, tool behavior, and usefulness together."""
-    scores = _run_jev_judge(judge_state(inputs, outputs, reference_outputs))
-    return {
-        "key": "jev_weather_quality",
-        "score": sum(scores.values()) / len(scores),
-        "comment": ", ".join(f"{name}={score:.3f}" for name, score in scores.items()),
-    }
+def _invoke(config: ModelConfig, questions: dict, state):
+    for attempt in range(6):
+        try:
+            return _classifier(config, questions).invoke(state)
+        except TypeSafeRateLimitError as error:
+            if attempt == 5:
+                raise RuntimeError(f"{config.label}: {error}") from None
+            time.sleep(min((error.retry_after_ms or 2_000) / 1_000, 60))
+        except TypeSafeAPIConnectionError as error:
+            if attempt == 5:
+                raise RuntimeError(f"{config.label}: {error}") from None
+            time.sleep(2)
+        except TypeSafeAPIError as error:
+            detail = error.body.get("detail") if isinstance(error.body, dict) else None
+            raise RuntimeError(f"{config.label}: {detail or error}") from None
 
 
-@traceable(name="jev_weather_does_pass")
-def _run_jev_does_pass(state: dict) -> float:
-    return TypeSafeClassifier(questions=DOES_PASS_QUESTIONS).invoke(state).nouls[
-        "does_pass"
-    ].noul
+def verify_decision_models() -> None:
+    failures = []
+    for config in DECISION_JUDGES.values():
+        try:
+            _invoke(config, DOES_PASS_QUESTIONS, "Gateway preflight")
+        except RuntimeError as error:
+            failures.append(str(error))
+    if failures:
+        raise RuntimeError(f"Gateway preflight failed: {'; '.join(failures)}")
 
 
-def jev_weather_does_pass(inputs: dict, outputs: dict, reference_outputs: dict) -> dict:
-    """Use Jev's does_pass judgment for an overall pass/fail result."""
-    probability = _run_jev_does_pass(judge_state(inputs, outputs, reference_outputs))
-    return {
-        "key": "jev_weather_does_pass",
-        "score": int(probability >= 0.5),
-        "comment": f"probability={probability:.3f}",
-    }
+def _build_evaluators(prefix: str, config: ModelConfig) -> tuple:
+    @traceable(name=f"{prefix}_weather_judge")
+    def run_quality(state: dict) -> dict:
+        response = _invoke(config, QUALITY_QUESTIONS, state)
+        return {name: answer.noul for name, answer in response.nouls.items()}
+
+    def quality(inputs: dict, outputs: dict, reference_outputs: dict) -> dict:
+        scores = run_quality(judge_state(inputs, outputs, reference_outputs))
+        return {
+            "key": f"{prefix}_weather_quality",
+            "score": sum(scores.values()) / len(scores),
+            "comment": ", ".join(
+                f"{name}={score:.3f}" for name, score in scores.items()
+            ),
+        }
+
+    @traceable(name=f"{prefix}_weather_does_pass")
+    def run_does_pass(state: dict) -> float:
+        return _invoke(config, DOES_PASS_QUESTIONS, state).nouls["does_pass"].noul
+
+    def does_pass(inputs: dict, outputs: dict, reference_outputs: dict) -> dict:
+        probability = run_does_pass(
+            judge_state(inputs, outputs, reference_outputs)
+        )
+        return {
+            "key": f"{prefix}_weather_does_pass",
+            "score": int(probability >= 0.5),
+            "comment": f"probability={probability:.3f}",
+        }
+
+    @traceable(name=f"{prefix}_weather_choice")
+    def run_choice(state: dict) -> dict:
+        answer = _invoke(config, CHOICE_QUESTIONS, state).choices["outcome"]
+        return {
+            "choice": answer.choice,
+            "confidence": answer.confidence,
+            "probabilities": answer.probabilities,
+        }
+
+    def choice(inputs: dict, outputs: dict, reference_outputs: dict) -> dict:
+        answer = run_choice(judge_state(inputs, outputs, reference_outputs))
+        return {
+            "key": f"{prefix}_weather_outcome",
+            "value": answer["choice"],
+            "comment": (
+                f"confidence={answer['confidence']:.3f}, "
+                f"probabilities={answer['probabilities']}"
+            ),
+        }
+
+    return quality, does_pass, choice
 
 
-@traceable(name="jev_weather_choice")
-def _run_jev_choice(state: dict) -> dict:
-    answer = TypeSafeClassifier(questions=CHOICE_QUESTIONS).invoke(state).choices[
-        "outcome"
-    ]
-    return {
-        "choice": answer.choice,
-        "confidence": answer.confidence,
-        "probabilities": answer.probabilities,
-    }
+DECISION_EVALUATORS = {
+    prefix: _build_evaluators(prefix, config)
+    for prefix, config in DECISION_JUDGES.items()
+}
 
-
-def jev_weather_choice(inputs: dict, outputs: dict, reference_outputs: dict) -> dict:
-    """Use Jev's Choice primitive to classify the response outcome."""
-    answer = _run_jev_choice(judge_state(inputs, outputs, reference_outputs))
-    return {
-        "key": "jev_weather_outcome",
-        "value": answer["choice"],
-        "comment": (
-            f"confidence={answer['confidence']:.3f}, "
-            f"probabilities={answer['probabilities']}"
-        ),
-    }
+jev_weather_quality, jev_weather_does_pass, jev_weather_choice = (
+    DECISION_EVALUATORS["jev"]
+)

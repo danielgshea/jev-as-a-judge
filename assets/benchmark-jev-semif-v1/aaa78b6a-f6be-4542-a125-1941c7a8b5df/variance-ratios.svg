@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1050" height="385" viewBox="0 0 1050 385">
+<rect width="100%" height="100%" fill="#030710"/>
+<text x="525.0" y="32.0" font-family="Lausanne, Inter, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="22px" text-anchor="middle" fill="#FFFFFF">Relative mean per-case variance</text>
+<text x="525.0" y="56.0" font-family="Lausanne, Inter, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="14px" text-anchor="middle" fill="#FFFFFF">Jev = 1× baseline; lower is more consistent</text>
+<line x1="190" y1="255.0" x2="1005" y2="255.0" stroke="#1A2740" stroke-width="1"/>
+<text x="180.0" y="260.0" font-family="Lausanne, Inter, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="12px" text-anchor="end" fill="#FFFFFF">0</text>
+<line x1="190" y1="219.0" x2="1005" y2="219.0" stroke="#1A2740" stroke-width="1"/>
+<text x="180.0" y="224.0" font-family="Lausanne, Inter, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="12px" text-anchor="end" fill="#FFFFFF">0.341</text>
+<line x1="190" y1="183.0" x2="1005" y2="183.0" stroke="#1A2740" stroke-width="1"/>
+<text x="180.0" y="188.0" font-family="Lausanne, Inter, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="12px" text-anchor="end" fill="#FFFFFF">0.681</text>
+<line x1="190" y1="147.0" x2="1005" y2="147.0" stroke="#1A2740" stroke-width="1"/>
+<text x="180.0" y="152.0" font-family="Lausanne, Inter, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="12px" text-anchor="end" fill="#FFFFFF">1.02</text>
+<line x1="190" y1="111.0" x2="1005" y2="111.0" stroke="#1A2740" stroke-width="1"/>
+<text x="180.0" y="116.0" font-family="Lausanne, Inter, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="12px" text-anchor="end" fill="#FFFFFF">1.36</text>
+<line x1="190" y1="75.0" x2="1005" y2="75.0" stroke="#1A2740" stroke-width="1"/>
+<text x="180.0" y="80.0" font-family="Lausanne, Inter, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="12px" text-anchor="end" fill="#FFFFFF">1.7</text>
+<text x="597.5" y="280.0" font-family="Lausanne, Inter, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="13px" text-anchor="middle" fill="#FFFFFF">Quality</text>
+<rect x="325.8" y="149.3" width="268.7" height="105.7" fill="#7FC8FF"/>
+<rect x="597.5" y="75.0" width="268.7" height="180.0" fill="#E3FF8F"/>
+<rect x="40.0" y="303" width="14" height="14" fill="#7FC8FF"/>
+<text x="62.0" y="315.0" font-family="Lausanne, Inter, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="12px" text-anchor="start" fill="#FFFFFF">Jev</text>
+<rect x="525.0" y="303" width="14" height="14" fill="#E3FF8F"/>
+<text x="547.0" y="315.0" font-family="Lausanne, Inter, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="12px" text-anchor="start" fill="#FFFFFF">SemIf</text>
+<text x="525.0" y="351.0" font-family="Lausanne, Inter, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="11px" text-anchor="middle" fill="#C8DDF0">How to read: compare each bar with the 1× Jev baseline; lower bars are steadier.</text>
+<text x="525.0" y="369.0" font-family="Lausanne, Inter, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="11px" text-anchor="middle" fill="#C8DDF0">What it means: bars above 1× are more variable than Jev; isolated high bars point to a metric-specific weakness.</text>
+</svg>

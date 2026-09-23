@@ -2,7 +2,7 @@
 
 Agent evaluators usually fall into two categories: deterministic code and LLM-as-a-judge. Code is fast and reliable but limited to behavior that can be expressed as explicit logic. LLM judges can evaluate open-ended agent behavior, but they add cost, latency, and variance.
 
-This project tests a third option: [Jev](https://docs.typesafe.ai/introduction), TypeSafe AI's System One decision model. We compare Jev with GPT-5.6 Luna, GPT-5.6 Terra, and Claude Sonnet 4.6 on the same fixed agent runs, measuring binary accuracy, score reliability, cost, and latency.
+This project tests a third option: [Jev](https://docs.typesafe.ai/introduction), TypeSafe AI's System One decision model. The archived experiment compares Jev with GPT-5.6 Luna, GPT-5.6 Terra, and Claude Sonnet 4.6 on recorded weather-agent responses. We measure oracle agreement, score reliability, cost, and latency.
 
 ## What is Jev?
 
@@ -26,7 +26,7 @@ That does not make any judge correct by default. A repeatable evaluator can stil
 
 ## Experiment
 
-We built a weather agent with [Deep Agents](https://www.langchain.com/deep-agents) and gave it access to Tavily web search. We defined five cases in a LangSmith dataset:
+We built a weather agent with [Deep Agents](https://www.langchain.com/deep-agents) and gave it access to Tavily web search. We defined five cases:
 
 | Request type | Location | User need |
 | --- | --- | --- |
@@ -36,16 +36,19 @@ We built a weather agent with [Deep Agents](https://www.langchain.com/deep-agent
 | Longer-range forecast | Tokyo | Report the extended forecast |
 | Ambiguous location | Springfield | Handle a request without a unique place |
 
-We ran the weather agent once for each case and stored its complete output, including the final answer, evidence, tool calls, and expected behavior. Freezing the agent runs meant that only the judges could introduce variation between repetitions.
+For the archived experiment, we ran the weather agent once per case and recorded its final answer, search evidence, tool calls, and expected behavior. Each repetition then reused those responses, so only the judges could introduce variation.
 
-Each judge evaluated the five captured runs 100 times with two signals:
+The current workflow stores a separate, permanent dataset named `weather-agent-recorded-context-safe-v1`. Each example contains the question, a GPT-5.5 recorded response, expected behavior, manual oracle labels with reasoning, and metadata. Search evidence is stored as at most four compact cards, and the five serialized judge states range from 282 to 3,252 characters. Reliability experiments return each recorded response unchanged and do not invoke the weather agent.
+
+Each judge evaluated the five recorded responses 100 times with three signals:
 
 | Evaluator | What it measures | Output |
 | --- | --- | --- |
 | `quality` | Grounding, search behavior, and usefulness | Continuous score from `0` to `1` |
 | `does_pass` | Overall success | Binary decision: `0` or `1` |
+| `outcome` | Response outcome | `answered`, `clarification_needed`, or `poor` |
 
-A human reviewer labeled each fixed response against the same rubric. We use those labels as the oracle for binary accuracy. We use the continuous `quality` score only to measure reliability through variance, not accuracy.
+A human reviewer labeled each recorded response against the same rubric. The archived experiment reports binary oracle accuracy and quality variance.
 
 ## Results
 
@@ -83,6 +86,22 @@ Jev had the lowest observed mean per-case variance: `0.0000149`. Luna was `433×
 
 This experiment cannot establish why Jev varied less. One hypothesis is that a model designed to return bounded decisions is a better fit for this task than a model designed for autoregressive generation. The result is observational, not evidence that the model architecture caused the lower variance.
 
+### SemIf reliability comparison
+
+A second experiment compared Jev with SemIf on the permanent recorded-context dataset. SemIf's mean per-case quality variance was `0.0000323`, or `1.70×` Jev's variance in the same run.
+
+| Judge | Mean quality variance | Jev variance in the same experiment | Relative to Jev |
+| --- | ---: | ---: | ---: |
+| Jev | 0.0000190 | 0.0000190 | 1× |
+| SemIf | 0.0000323 | 0.0000190 | 1.70× |
+| Claude Sonnet 4.6 | 0.00137 | 0.0000149 | 92× |
+| GPT-5.6 Luna | 0.00647 | 0.0000149 | 433× |
+| GPT-5.6 Terra | 0.01364 | 0.0000149 | 913× |
+
+The table is sorted by observed mean quality variance. Each relative score uses the Jev result from the same experiment, so the SemIf run and archived oracle run retain their paired baselines.
+
+![Jev and SemIf quality-score oscillation](./assets/benchmark-jev-semif-v1/aaa78b6a-f6be-4542-a125-1941c7a8b5df/quality-oscillation.svg)
+
 ### Cost
 
 | Judge | Average cost per call | Average latency | Total evaluator cost |
@@ -104,7 +123,7 @@ That can speed up the entire agent development lifecycle. Agent engineers can tu
 
 ## Run the project
 
-Requires Python 3.13+, a Tavily API key, a TypeSafe API key, and a workspace-scoped LangSmith API key with Gateway access.
+Requires Python 3.13+, a Tavily API key, a workspace-scoped LangSmith API key, and a LangSmith Gateway key authorized for the configured judge models.
 
 ```bash
 cp .env.example .env
@@ -112,46 +131,67 @@ cp .env.example .env
 uv sync
 ```
 
-Run the local evaluation without uploading an experiment:
+Run the weather agent:
 
 ```bash
-uv run python main.py
+uv run python -m weather_agent
 ```
 
-Upload the dataset and record an evaluation experiment in LangSmith:
+The permanent dataset already exists in the LangSmith workspace used for this repository. In a new workspace, run its creator once. The command intentionally fails if the dataset name already exists:
 
 ```bash
-uv run python src/evals/offline_evals.py
+uv run python -m evals.datasets.recorded
 ```
 
 Reproduce the repeated-judge benchmark:
 
 ```bash
-uv run python src/evals/judge_reliability.py
+uv run python -m evals.reliability.experiment
 ```
 
-Use `--local` with the benchmark command to run without uploading an experiment.
+This runs Jev and SemIf against the stored responses. It defaults to 100 repetitions with two concurrent evaluator calls. Use `--trials` and `--max-concurrency` to change those values.
+
+Archive a completed experiment:
+
+```bash
+uv run python -m evals.reliability.archive EXPERIMENT_ID \
+  --output assets/EXPERIMENT_ID/benchmark.json
+```
+
+Inspect trace metrics or generate SVGs:
+
+```bash
+uv run python -m evals.analysis.traces EXPERIMENT_ID
+uv run python -m evals.analysis.visualize EXPERIMENT_ID
+```
+
+Run the test suite:
+
+```bash
+uv run python -m unittest discover -s tests -v
+```
 
 ### Configuration
 
 | Variable | Purpose |
 | --- | --- |
 | `TAVILY_API_KEY` | Web search used by the weather agent |
-| `TYPESAFE_API_KEY` | Jev evaluator access |
-| `LANGSMITH_API_KEY` | LangSmith tracing, datasets, evaluation, and Gateway access |
-| `LS_LLM_GATEWAY_KEY` | LangSmith Gateway model invocation |
-| `LANGSMITH_GATEWAY` | Routes the weather agent through LangSmith Gateway when `true` |
+| `LANGSMITH_API_KEY` | LangSmith tracing, datasets, evaluation, and OpenAI Gateway access |
+| `LS_LLM_GATEWAY_KEY` | LangSmith Gateway access for Jev, SemIf, and Claude |
+| `LANGSMITH_GATEWAY` | Routes the weather agent through LangSmith Gateway; command entry points force it to `true` |
 | `LANGSMITH_TRACING` | Enables LangSmith traces when `true` |
 | `LANGSMITH_PROJECT` | LangSmith project for traces |
-| `WEATHER_AGENT_MODEL` | Weather-agent model identifier |
+| `WEATHER_AGENT_MODEL` | Model used by `python -m weather_agent`; dataset generation is fixed to `openai:gpt-5.5` |
 
 ## Reproducibility
 
 The published LangSmith experiment is `benchmark-jev-luna-terra-sonnet` (`6d08df72-c878-458c-b7c5-a7824ee6e721`), started at `2026-09-18T17:53:25Z`.
 
-- [Frozen cases and variance analysis](./assets/benchmark-jev-luna-terra-sonnet/6d08df72-c878-458c-b7c5-a7824ee6e721/benchmark.json)
+- [Recorded cases and variance analysis](./assets/benchmark-jev-luna-terra-sonnet/6d08df72-c878-458c-b7c5-a7824ee6e721/benchmark.json)
 - [Human oracle labels](./assets/benchmark-jev-luna-terra-sonnet/6d08df72-c878-458c-b7c5-a7824ee6e721/oracle-labels.json)
 - [Generated result assets](./assets/benchmark-jev-luna-terra-sonnet-oracle/6d08df72-c878-458c-b7c5-a7824ee6e721/)
+
+The permanent `weather-agent-recorded-context-safe-v1` dataset was created after the archived experiment. It is the source of truth for the Jev and SemIf experiment (`aaa78b6a-f6be-4542-a125-1941c7a8b5df`) and future reliability runs.
 
 The LLM judges ran through LangSmith Gateway with `openai/gpt-5.6-luna`, `openai/gpt-5.6-terra`, and `anthropic/claude-sonnet-4-6`. Jev ran through `langchain-typesafe==0.0.1a2`. The experiment used `deepagents==0.7.15`, `langchain-openai==1.6.2`, `langsmith==0.12.6`, and `tavily-python==0.8.3`.
 
@@ -159,14 +199,13 @@ We did not set temperature, top-p, seed, or max tokens for the LLM judges, so pr
 
 ## Project layout
 
-- `src/weather_agent/` — Deep Agents weather agent and Tavily tool
-- `src/evals/dataset.py` — LangSmith dataset definition
-- `src/evals/judges/` — Jev and LLM evaluators
-- `src/evals/offline_evals.py` — Dataset evaluation runner
-- `src/evals/judge_reliability.py` — Repeated-judge benchmark
-- `analysis/` — Accuracy, variance, cost, and latency analysis
+- `src/weather_agent/` — Deep Agents weather agent and compact Tavily search tool
+- `src/evals/datasets/` — Cases and recorded LangSmith dataset creation
+- `src/evals/judges/` — Judge state, System One, and LLM evaluators
+- `src/evals/reliability/` — Statistics, experiment orchestration, and archiving
+- `src/evals/analysis/` — Accuracy, variance, cost, latency, and visualization
 - `assets/` — Archived benchmark data and generated charts
-- `tests/` — Focused analysis tests
+- `tests/` — Dataset, judge-state, statistics, oracle-scoring, and trace-metric tests
 
 ## References
 

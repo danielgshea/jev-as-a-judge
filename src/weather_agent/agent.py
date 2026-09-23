@@ -1,43 +1,25 @@
-import os
-from typing import Literal
-
 from deepagents import create_deep_agent
-from dotenv import load_dotenv
 from tavily import TavilyClient
 
-load_dotenv()
-os.environ["LANGSMITH_GATEWAY"] = "true"
-
-tavily_client = TavilyClient(api_key=os.environ["TAVILY_API_KEY"])
-
-
-def search_weather(
-    query: str,
-    max_results: int = 5,
-    topic: Literal["general", "news", "finance"] = "general",
-):
-    """Search the web for current weather conditions or forecasts."""
-    return tavily_client.search(
-        query,
-        max_results=max_results,
-        topic=topic,
-        include_raw_content=False,
-    )
+from .search import create_weather_search
 
 
 weather_instructions = """You are a weather assistant.
 
 Use search_weather for every weather question that needs current or forecast data.
 Search with the location, date or date range, and the word weather or forecast.
+Call search_weather at most once.
 Prefer authoritative weather sources when the search results provide them.
 Never invent weather details. State when a result is unavailable or uncertain.
 Include the location, forecast time, useful conditions such as temperature and precipitation,
-and source links in your answer. If a location is ambiguous, ask the user to clarify it
-before searching.
+and source links in a concise answer. If a location is ambiguous, ask the user to clarify
+it before searching.
 """
 
-agent = create_deep_agent(
-    model=os.getenv("WEATHER_AGENT_MODEL", "openai:gpt-5.5"),
-    tools=[search_weather],
-    system_prompt=weather_instructions,
-).with_config({"recursion_limit": 20})
+
+def create_weather_agent(*, model: str, tavily_api_key: str):
+    return create_deep_agent(
+        model=model,
+        tools=[create_weather_search(TavilyClient(api_key=tavily_api_key))],
+        system_prompt=weather_instructions,
+    ).with_config({"recursion_limit": 20})

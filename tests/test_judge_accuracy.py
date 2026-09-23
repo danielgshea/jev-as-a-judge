@@ -1,6 +1,6 @@
 import unittest
 
-from analysis.common import score_oracle
+from evals.analysis.common import score_oracle
 
 
 class JudgeAccuracyTest(unittest.TestCase):
@@ -12,7 +12,7 @@ class JudgeAccuracyTest(unittest.TestCase):
                 "does_pass": {"Judge": [[1, 0]]},
             },
         }
-        frozen_cases = [{"inputs": {"question": "Question"}}]
+        recorded_cases = [{"inputs": {"question": "Question"}}]
         oracle = {
             "labels": [
                 {
@@ -25,7 +25,7 @@ class JudgeAccuracyTest(unittest.TestCase):
             ]
         }
 
-        result = score_oracle(data, frozen_cases, oracle, tolerance=0.1)["judges"]["Judge"]
+        result = score_oracle(data, recorded_cases, oracle, tolerance=0.1)["judges"]["Judge"]
 
         self.assertEqual(result["predictions"], 2)
         self.assertEqual(result["does_pass_accuracy"], 0.5)

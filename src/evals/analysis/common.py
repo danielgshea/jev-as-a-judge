@@ -1,12 +1,15 @@
 import re
 from collections import defaultdict
 
-from evals.model import LLM_JUDGES
+from evals.config import DECISION_JUDGES, LLM_JUDGES
 
 
 UUID_PATTERN = r"[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}"
 NUMERIC_METRICS = ("quality", "does_pass")
-JUDGE_LABELS = {"jev": "Jev", **{key: config.label for key, config in LLM_JUDGES.items()}}
+JUDGE_LABELS = {
+    **{key: config.label for key, config in DECISION_JUDGES.items()},
+    **{key: config.label for key, config in LLM_JUDGES.items()},
+}
 QUALITY_FIELDS = ("is_grounded", "matches_search_expectation", "is_useful")
 
 
@@ -47,7 +50,7 @@ def _oracle_labels(labels: list[dict], questions: list[str]) -> dict[str, dict]:
                 raise ValueError(f"{question!r}: {field} must be 0 or 1.")
         by_question[question] = label
     if set(by_question) != set(questions):
-        raise ValueError("Oracle labels must match the archived frozen-case questions exactly.")
+        raise ValueError("Oracle labels must match the archived recorded-case questions exactly.")
     return by_question
 
 
@@ -62,8 +65,8 @@ def _oracle_metric(data: dict, metric: str, judge: str, case_count: int) -> list
     return values
 
 
-def score_oracle(data: dict, frozen_cases: list[dict], oracle: dict, tolerance: float = 0.10) -> dict:
-    questions = [case["inputs"]["question"] for case in frozen_cases]
+def score_oracle(data: dict, recorded_cases: list[dict], oracle: dict, tolerance: float = 0.10) -> dict:
+    questions = [case["inputs"]["question"] for case in recorded_cases]
     labels = _oracle_labels(oracle.get("labels", []), questions)
     report = {}
     for _, judge in data["judges"]:

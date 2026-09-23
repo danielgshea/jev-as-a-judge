@@ -2,9 +2,9 @@
   "analysis": {
     "analysis": {
       "bootstrap_samples": 10000,
-      "bootstrap_unit": "frozen case",
+      "bootstrap_unit": "recorded case",
       "confidence_level": 0.95,
-      "variance_definition": "unbiased sample variance within each frozen case"
+      "variance_definition": "unbiased sample variance within each recorded case"
     },
     "comparison": {
       "claude_sonnet": {
@@ -315,7 +315,7 @@
     "started_at": "2026-09-18T17:53:25.864477+00:00"
   },
   "experiment_id": "6d08df72-c878-458c-b7c5-a7824ee6e721",
-  "frozen_cases": [
+  "recorded_cases": [
     {
       "inputs": {
         "question": "What is the forecast for Tokyo next week?"

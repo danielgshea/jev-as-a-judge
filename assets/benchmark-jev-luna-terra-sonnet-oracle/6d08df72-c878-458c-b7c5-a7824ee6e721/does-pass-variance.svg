@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1000" height="514" viewBox="0 0 1000 514">
 <rect width="100%" height="100%" fill="#030710"/>
-<text x="500.0" y="32.0" font-family="Lausanne, Inter, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="22px" text-anchor="middle" fill="#FFFFFF">Binary pass/fail variance by frozen case</text>
+<text x="500.0" y="32.0" font-family="Lausanne, Inter, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="22px" text-anchor="middle" fill="#FFFFFF">Binary pass/fail variance by recorded case</text>
 <text x="500.0" y="56.0" font-family="Lausanne, Inter, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="14px" text-anchor="middle" fill="#FFFFFF">Each dot is one case; 0 is stable and 0.25 is a 50/50 pass/fail split</text>
 <line x1="190.0" y1="105" x2="190.0" y2="409" stroke="#1A2740" stroke-width="1"/>
 <text x="190.0" y="429.0" font-family="Lausanne, Inter, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="12px" text-anchor="middle" fill="#FFFFFF">0.00</text>

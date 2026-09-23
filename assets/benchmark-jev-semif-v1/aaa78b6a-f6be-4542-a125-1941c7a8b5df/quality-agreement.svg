@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1100" height="266" viewBox="0 0 1100 266">
+<rect width="100%" height="100%" fill="#030710"/>
+<text x="550.0" y="32.0" font-family="Lausanne, Inter, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="22px" text-anchor="middle" fill="#FFFFFF">Oracle quality agreement</text>
+<text x="550.0" y="56.0" font-family="Lausanne, Inter, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="14px" text-anchor="middle" fill="#FFFFFF">MAE is lower; agreement is within ±0.10 of the oracle quality score</text>
+<line x1="260.0" y1="105" x2="260.0" y2="191" stroke="#1A2740" stroke-width="1"/>
+<text x="260.0" y="211.0" font-family="Lausanne, Inter, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="12px" text-anchor="middle" fill="#FFFFFF">0</text>
+<line x1="323.0" y1="105" x2="323.0" y2="191" stroke="#1A2740" stroke-width="1"/>
+<text x="323.0" y="211.0" font-family="Lausanne, Inter, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="12px" text-anchor="middle" fill="#FFFFFF">0.06</text>
+<line x1="386.0" y1="105" x2="386.0" y2="191" stroke="#1A2740" stroke-width="1"/>
+<text x="386.0" y="211.0" font-family="Lausanne, Inter, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="12px" text-anchor="middle" fill="#FFFFFF">0.12</text>
+<line x1="449.0" y1="105" x2="449.0" y2="191" stroke="#1A2740" stroke-width="1"/>
+<text x="449.0" y="211.0" font-family="Lausanne, Inter, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="12px" text-anchor="middle" fill="#FFFFFF">0.18</text>
+<line x1="512.0" y1="105" x2="512.0" y2="191" stroke="#1A2740" stroke-width="1"/>
+<text x="512.0" y="211.0" font-family="Lausanne, Inter, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="12px" text-anchor="middle" fill="#FFFFFF">0.24</text>
+<line x1="575.0" y1="105" x2="575.0" y2="191" stroke="#1A2740" stroke-width="1"/>
+<text x="575.0" y="211.0" font-family="Lausanne, Inter, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="12px" text-anchor="middle" fill="#FFFFFF">0.3</text>
+<line x1="675.0" y1="105" x2="675.0" y2="191" stroke="#1A2740" stroke-width="1"/>
+<text x="675.0" y="211.0" font-family="Lausanne, Inter, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="12px" text-anchor="middle" fill="#FFFFFF">0</text>
+<line x1="751.0" y1="105" x2="751.0" y2="191" stroke="#1A2740" stroke-width="1"/>
+<text x="751.0" y="211.0" font-family="Lausanne, Inter, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="12px" text-anchor="middle" fill="#FFFFFF">0.2</text>
+<line x1="827.0" y1="105" x2="827.0" y2="191" stroke="#1A2740" stroke-width="1"/>
+<text x="827.0" y="211.0" font-family="Lausanne, Inter, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="12px" text-anchor="middle" fill="#FFFFFF">0.4</text>
+<line x1="903.0" y1="105" x2="903.0" y2="191" stroke="#1A2740" stroke-width="1"/>
+<text x="903.0" y="211.0" font-family="Lausanne, Inter, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="12px" text-anchor="middle" fill="#FFFFFF">0.6</text>
+<line x1="979.0" y1="105" x2="979.0" y2="191" stroke="#1A2740" stroke-width="1"/>
+<text x="979.0" y="211.0" font-family="Lausanne, Inter, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="12px" text-anchor="middle" fill="#FFFFFF">0.8</text>
+<line x1="1055.0" y1="105" x2="1055.0" y2="191" stroke="#1A2740" stroke-width="1"/>
+<text x="1055.0" y="211.0" font-family="Lausanne, Inter, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="12px" text-anchor="middle" fill="#FFFFFF">1</text>
+<text x="248.0" y="135.0" font-family="Lausanne, Inter, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="12px" text-anchor="end" fill="#FFFFFF">Jev</text>
+<rect x="260" y="118" width="153.9" height="24" fill="#7FC8FF"/>
+<text x="421.9" y="135.0" font-family="Lausanne, Inter, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="12px" text-anchor="start" fill="#FFFFFF">0.147</text>
+<rect x="675" y="118" width="101.1" height="24" fill="#7FC8FF"/>
+<text x="784.1" y="135.0" font-family="Lausanne, Inter, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="12px" text-anchor="start" fill="#FFFFFF">26.6%</text>
+<text x="248.0" y="193.0" font-family="Lausanne, Inter, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="12px" text-anchor="end" fill="#FFFFFF">SemIf</text>
+<rect x="260" y="176" width="226.4" height="24" fill="#E3FF8F"/>
+<text x="494.4" y="193.0" font-family="Lausanne, Inter, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="12px" text-anchor="start" fill="#FFFFFF">0.216</text>
+<rect x="675" y="176" width="76.0" height="24" fill="#E3FF8F"/>
+<text x="759.0" y="193.0" font-family="Lausanne, Inter, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="12px" text-anchor="start" fill="#FFFFFF">20.0%</text>
+<text x="417.5" y="87.0" font-family="Lausanne, Inter, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="13px" text-anchor="middle" fill="#FFFFFF">Mean absolute error</text>
+<text x="865.0" y="87.0" font-family="Lausanne, Inter, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="13px" text-anchor="middle" fill="#FFFFFF">Within tolerance</text>
+<text x="550.0" y="232.0" font-family="Lausanne, Inter, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="11px" text-anchor="middle" fill="#C8DDF0">How to read: compare MAE on the left and the within-tolerance share on the right.</text>
+<text x="550.0" y="250.0" font-family="Lausanne, Inter, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="11px" text-anchor="middle" fill="#C8DDF0">What it means: shorter left bars and longer right bars indicate closer agreement with the human oracle.</text>
+</svg>

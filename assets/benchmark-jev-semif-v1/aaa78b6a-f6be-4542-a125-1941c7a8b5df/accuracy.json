@@ -1,0 +1,113 @@
+{
+  "cases": 5,
+  "quality_tolerance": 0.1,
+  "judges": {
+    "Jev": {
+      "predictions": 500,
+      "does_pass_accuracy": 0.598,
+      "quality_mae": 0.1465602666666667,
+      "quality_within_tolerance": 0.266,
+      "cases": [
+        {
+          "question": "What is the forecast for Tokyo next week?",
+          "repetitions": 100,
+          "does_pass_oracle": 1,
+          "does_pass_accuracy": 1.0,
+          "quality_oracle": 1.0,
+          "quality_mae": 0.057815000000000005,
+          "quality_within_tolerance": 1.0
+        },
+        {
+          "question": "What is the weather in Seattle today?",
+          "repetitions": 100,
+          "does_pass_oracle": 1,
+          "does_pass_accuracy": 1.0,
+          "quality_oracle": 1.0,
+          "quality_mae": 0.168264,
+          "quality_within_tolerance": 0.0
+        },
+        {
+          "question": "What is the weather in Springfield today?",
+          "repetitions": 100,
+          "does_pass_oracle": 1,
+          "does_pass_accuracy": 0.99,
+          "quality_oracle": 1.0,
+          "quality_mae": 0.11116799999999999,
+          "quality_within_tolerance": 0.02
+        },
+        {
+          "question": "What will the weather be like in Austin, Texas this weekend?",
+          "repetitions": 100,
+          "does_pass_oracle": 1,
+          "does_pass_accuracy": 0.0,
+          "quality_oracle": 1.0,
+          "quality_mae": 0.10473499999999998,
+          "quality_within_tolerance": 0.31
+        },
+        {
+          "question": "Will I need an umbrella in Dublin tomorrow?",
+          "repetitions": 100,
+          "does_pass_oracle": 0,
+          "does_pass_accuracy": 0.0,
+          "quality_oracle": 0.6666666666666666,
+          "quality_mae": 0.2908193333333334,
+          "quality_within_tolerance": 0.0
+        }
+      ]
+    },
+    "SemIf": {
+      "predictions": 500,
+      "does_pass_accuracy": 0.4,
+      "quality_mae": 0.21560573333333333,
+      "quality_within_tolerance": 0.2,
+      "cases": [
+        {
+          "question": "What is the forecast for Tokyo next week?",
+          "repetitions": 100,
+          "does_pass_oracle": 1,
+          "does_pass_accuracy": 1.0,
+          "quality_oracle": 1.0,
+          "quality_mae": 0.03227500000000001,
+          "quality_within_tolerance": 1.0
+        },
+        {
+          "question": "What is the weather in Seattle today?",
+          "repetitions": 100,
+          "does_pass_oracle": 1,
+          "does_pass_accuracy": 1.0,
+          "quality_oracle": 1.0,
+          "quality_mae": 0.170919,
+          "quality_within_tolerance": 0.0
+        },
+        {
+          "question": "What is the weather in Springfield today?",
+          "repetitions": 100,
+          "does_pass_oracle": 1,
+          "does_pass_accuracy": 0.0,
+          "quality_oracle": 1.0,
+          "quality_mae": 0.22066499999999997,
+          "quality_within_tolerance": 0.0
+        },
+        {
+          "question": "What will the weather be like in Austin, Texas this weekend?",
+          "repetitions": 100,
+          "does_pass_oracle": 1,
+          "does_pass_accuracy": 0.0,
+          "quality_oracle": 1.0,
+          "quality_mae": 0.502646,
+          "quality_within_tolerance": 0.0
+        },
+        {
+          "question": "Will I need an umbrella in Dublin tomorrow?",
+          "repetitions": 100,
+          "does_pass_oracle": 0,
+          "does_pass_accuracy": 0.0,
+          "quality_oracle": 0.6666666666666666,
+          "quality_mae": 0.1515236666666666,
+          "quality_within_tolerance": 0.0
+        }
+      ]
+    }
+  },
+  "experiment_id": "aaa78b6a-f6be-4542-a125-1941c7a8b5df"
+}
